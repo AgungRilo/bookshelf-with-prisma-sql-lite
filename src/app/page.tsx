@@ -2,36 +2,66 @@
 
 import { Button, Form, Input, message } from 'antd';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
+import { useAppSelector, useAppDispatch } from '@/redux/hooks';
+import { login } from '@/redux/features/authSlice';
+import axios from 'axios';
+import LoadingScreen from './components/loadingScreen';
 export default function LoginPage() {
   const router = useRouter();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const [loading, setLoading] = useState(false);
+  const [loadingScreen, setLoadingScreen] = useState(true);
 
-  const onFinish = async (values: { email: string; password: string }) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/user/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        message.success('Login successful');
-        // Redirect to dashboard
-        router.push('/dashboard');
-      } else {
-        message.error(data.error || 'Login failed');
+  const dispatch = useAppDispatch();
+  if (typeof window !== 'undefined') {
+    const originalConsoleError = console.error;
+    console.error = (...args) => {
+      if (args[0]?.includes('Warning: React hydration mismatch')) {
+        return; // Ignore hydration mismatch warnings
       }
-    } catch (error) {
-      message.error('Something went wrong');
+      originalConsoleError(...args);
+    };
+  }
+   useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard'); 
+    }
+  }, [isAuthenticated, router]);
+  useEffect(() => {
+      const timer = setTimeout(() => {
+        setLoadingScreen(false)
+      }, 500);
+  
+      return () => clearTimeout(timer);
+    }, [])
+  const onFinish = async (values: { email: string; password: string }) => {
+    setLoading(true); // Indikasi loading
+    try {
+      const response = await axios.post('/api/user/login', values); // Request dengan axios
+  
+      // Jika response sukses
+      if (response.status === 200) {
+        const data = response.data;
+        dispatch(login(data?.user));
+        router.push('/dashboard'); 
+        message.success('Login successful');
+      }
+    } catch (error: any) {
+      if (error.response) {
+        message.error(error.response.data.error || 'Login failed'); // Pesan error dari server
+      } else {
+        message.error('Something went wrong'); // Error selain dari server
+      }
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };
+
+  if (loadingScreen) {
+    return <LoadingScreen />;
+  }
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

@@ -2,36 +2,42 @@
 
 import { Button, Form, Input, message } from 'antd';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RegisterFormValues } from '../../interface/interface';
+import { useAppSelector } from '@/redux/hooks';
+import axios from 'axios';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const [loading, setLoading] = useState(false);
-
-  const onFinish = async (values: RegisterFormValues) => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/user/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        message.success('Registration successful!');
-        router.push('/'); // Redirect to login page
-      } else {
-        message.error(data.error || 'Registration failed');
-      }
-    } catch (error) {
-      message.error('Something went wrong');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard'); 
     }
-  };
+  }, [isAuthenticated, router]);
+
+
+const onFinish = async (values: RegisterFormValues) => {
+  setLoading(true);
+  try {
+    const response = await axios.post('/api/user/register', values);
+
+    if (response.status === 200) {
+      message.success('Registration successful!');
+      router.push('/'); 
+    }
+  } catch (error: any) {
+    if (error.response) {
+      message.error(error.response.data.error || 'Registration failed'); 
+    } else {
+      message.error('Something went wrong'); 
+    }
+  } finally {
+    setLoading(false); 
+  }
+};
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
