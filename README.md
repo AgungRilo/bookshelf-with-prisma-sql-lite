@@ -44,3 +44,12 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Tailwind
 - Redux Thunk
 - Redux Persist
+
+## Features
+
+- Persist Auth 
+- Protected Route
+- Dark and Light mode
+- Grouping books scope by user login
+- Search with debounce
+- Data Proses Reading in detail and edit page

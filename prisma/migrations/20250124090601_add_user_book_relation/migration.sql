@@ -15,8 +15,10 @@ CREATE TABLE "Book" (
     "category" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "isbn" TEXT NOT NULL,
-    "coverImage" BLOB,
-    "note" TEXT NOT NULL,
+    "coverImage" BLOB NOT NULL,
+    "note" TEXT,
+    "startReadingAt" DATETIME,
+    "endReadingAt" DATETIME,
     "userId" INTEGER NOT NULL,
     CONSTRAINT "Book_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );

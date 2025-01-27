@@ -30,9 +30,13 @@ model Book {
   author    String
   category  String
   status    String
-  isbn      String
-  coverImage Bytes? 
-  note       String
+  isbn      String @unique
+  coverImage Bytes 
+  note       String?
+  createdAt DateTime @default(now())
+  startReadingAt DateTime?
+  endReadingAt   DateTime?
+  // Relasi ke model User
   userId    Int
   user      User     @relation(fields: [userId], references: [id]) // Relasi ke model User
 }

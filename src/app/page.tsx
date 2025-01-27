@@ -7,6 +7,7 @@ import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import { login } from '@/redux/features/authSlice';
 import axios from 'axios';
 import LoadingScreen from './components/loadingScreen';
+
 export default function LoginPage() {
   const router = useRouter();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
@@ -14,47 +15,40 @@ export default function LoginPage() {
   const [loadingScreen, setLoadingScreen] = useState(true);
 
   const dispatch = useAppDispatch();
-  if (typeof window !== 'undefined') {
-    const originalConsoleError = console.error;
-    console.error = (...args) => {
-      if (args[0]?.includes('Warning: React hydration mismatch')) {
-        return; // Ignore hydration mismatch warnings
-      }
-      originalConsoleError(...args);
-    };
-  }
-   useEffect(() => {
+
+  useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard'); 
+      router.replace('/dashboard'); // Redirect ke dashboard jika sudah login
     }
   }, [isAuthenticated, router]);
+
   useEffect(() => {
-      const timer = setTimeout(() => {
-        setLoadingScreen(false)
-      }, 500);
-  
-      return () => clearTimeout(timer);
-    }, [])
+    const timer = setTimeout(() => {
+      setLoadingScreen(false);
+    }, 500); // Hilangkan loading screen setelah 500ms
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true); // Indikasi loading
     try {
-      const response = await axios.post('/api/user/login', values); // Request dengan axios
-  
-      // Jika response sukses
+      const response = await axios.post('/api/user/login', values);
+
       if (response.status === 200) {
         const data = response.data;
-        dispatch(login(data?.user));
-        router.push('/dashboard'); 
+        dispatch(login(data?.user)); // Simpan user ke Redux state
+        router.replace('/dashboard');
         message.success('Login successful');
       }
     } catch (error: any) {
       if (error.response) {
-        message.error(error.response.data.error || 'Login failed'); // Pesan error dari server
+        message.error(error.response.data.error || 'Login failed');
       } else {
-        message.error('Something went wrong'); // Error selain dari server
+        message.error('Something went wrong');
       }
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -62,6 +56,9 @@ export default function LoginPage() {
     return <LoadingScreen />;
   }
 
+  if (isAuthenticated) {
+    return null; // Pastikan halaman login tidak ditampilkan jika sudah login
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -77,7 +74,7 @@ export default function LoginPage() {
           <Form.Item
             label="Email"
             name="email"
-            rules={[{ required: true, message: 'Please input your email!' }]}
+            rules={[{ required: true, message: 'Please input your email!' },  { type: 'email', message: 'Please enter a valid email!' },]}
           >
             <Input placeholder="Enter your email" />
           </Form.Item>

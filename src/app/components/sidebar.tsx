@@ -2,31 +2,28 @@
 
 import React from 'react';
 import { Layout, Menu } from 'antd';
-import { UserOutlined, PlusOutlined, BulbOutlined, LogoutOutlined, BookOutlined } from '@ant-design/icons';
+import { UserOutlined, BookOutlined } from '@ant-design/icons';
 
 const { Sider } = Layout;
 
 const menuItems = [
     {
       key: '1',
-      icon: <UserOutlined />,
+      icon: <BookOutlined />,
       label: 'Dashboard',
     },
   ];
 const Sidebar: React.FC = () => {
   return (
     <Sider
-      collapsible
+      collapsible={false}
       breakpoint="md"
       collapsedWidth="80"
       className="h-full"
     >
       <div className="flex items-center justify-center  h-16 bg-blue-500">
         <BookOutlined className="text-white text-2xl text-center" />
-        {/* Teks hanya tampil saat expanded */}
-        {/* <span className="text-white text-lg font-bold ml-2 hidden md:inline">
-          Bookshelf
-        </span> */}
+        <span className="ext-white ml-2 hidden sm:inline truncate">BookShelf</span>
       </div>
       <Menu
         theme="dark"

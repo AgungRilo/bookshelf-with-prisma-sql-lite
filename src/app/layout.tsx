@@ -7,11 +7,8 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '@/redux/store';
 import ProtectedRoute from './components/protectedRoute';
 import { useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-// export const metadata = {
-//   title: 'BookShelf',
-//   description: 'Manage your books with BookShelf',
-// };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [isPublicRoute, setIsPublicRoute] = useState(true);
@@ -28,7 +25,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {isPublicRoute ? (
               children
             ) : (
-              <ProtectedRoute>{children}</ProtectedRoute>
+              <ProtectedRoute>
+                  {children}
+              </ProtectedRoute>
             )}
           </PersistGate>
         </Provider>
