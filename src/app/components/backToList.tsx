@@ -4,16 +4,14 @@ import { useRouter } from 'next/navigation';
 interface BackToListProps {
     route?: string; // Default route untuk kembali
     data?: boolean; // Default
-    onClick?: () => void; 
+    onClick?: () => void;
 }
 
 const BackToList: React.FC<BackToListProps> = ({ route, data, onClick }) => {
     const router = useRouter();
-
     return (
         <div className='flex justify-between'>
-
-            <Button
+            <div
                 onClick={() => router.push(route || '/dashboard')}
                 style={{
                     background: 'none',
@@ -26,11 +24,12 @@ const BackToList: React.FC<BackToListProps> = ({ route, data, onClick }) => {
                     gap: '8px',
                 }}
             >
-                <span style={{ fontSize: '18px' }}>←</span> Back to Dashboard
-            </Button>
+                <span style={{ fontSize: '18px' }}>←
+                </span> Back to {`${route === '/dashboard' ? 'Dashboard' : 'Detail'}`}
+            </div>
             {data &&
                 <Button onClick={onClick}>
-                   Data Progress
+                    Reading Progress
                 </Button>
             }
         </div>

@@ -14,7 +14,6 @@ import { useAppSelector } from '@/redux/hooks';
 import { SearchOutlined } from '@ant-design/icons';
 import TableSkeleton from '../components/skeletonTable';
 const { Content } = Layout;
-const { Search } = Input;
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -71,11 +70,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSearch = (value: string) => {
-    setSearch(value);
-    setPage(1); // Reset ke halaman pertama saat pencarian
-  };
-
   // Debounce untuk input pencarian
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -114,16 +108,19 @@ export default function DashboardPage() {
   const handleDelete = async (bookId: number) => {
     setDeleteModalVisible(false);
     try {
-      // Kirim ID sebagai query parameter
       await axios.delete(`/api/books/delete?id=${bookId}`);
       message.success('Book deleted successfully');
-      fetchBooks(Number(userId), page, pageSize, search); // Refresh list
+      fetchBooks(Number(userId), page, pageSize, search); 
     } catch (error) {
       console.error('Failed to delete book:', error);
       message.error('Failed to delete book');
     }
   };
-  
+
+  const goToDetail = (id: number) => {
+    router.push(`/dashboard/detail/${id}`);
+  };
+
 
   const columns = [
     {
@@ -172,7 +169,7 @@ export default function DashboardPage() {
             className="text-xl text-red-500 cursor-pointer"
           />
           <FontAwesomeIcon
-            onClick={() => handleDelete(record.id)}
+            onClick={() => goToDetail(record.id)}
             icon={faArrowCircleRight}
             className="text-xl text-blue-500 cursor-pointer"
           />
@@ -256,16 +253,16 @@ export default function DashboardPage() {
           }
         </div>
         <Modal
-        title="Confirm Delete"
-        open={deleteModalVisible}
-        onOk={()=>handleDelete(Number(bookToDelete))}
-        onCancel={() => setDeleteModalVisible(false)}
-        okText="Delete"
-        cancelText="Cancel"
-        okButtonProps={{ danger: true }}
-      >
-        <p>Are you sure you want to delete this post?</p>
-      </Modal>
+          title="Confirm Delete"
+          open={deleteModalVisible}
+          onOk={() => handleDelete(Number(bookToDelete))}
+          onCancel={() => setDeleteModalVisible(false)}
+          okText="Delete"
+          cancelText="Cancel"
+          okButtonProps={{ danger: true }}
+        >
+          <p>Are you sure you want to delete this post?</p>
+        </Modal>
       </Content>
     </Container>
   );

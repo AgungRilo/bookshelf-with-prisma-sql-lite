@@ -12,11 +12,11 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAppSelector } from '@/redux/hooks';
 
-
 export default function AddDashboardPage() {
     const [isModalVisibleConfirm, setIsModalVisibleConfirm] = useState<boolean>(false);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [isFormTouched, setIsFormTouched] = useState<boolean>(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const data = useAppSelector((state) => state.auth.user);
     const router = useRouter();
     const { Option } = Select;
@@ -47,35 +47,30 @@ export default function AddDashboardPage() {
     const handleModalCancel = () => {
         setIsModalVisibleConfirm(false);
     };
-
+    const convertFileToArrayBuffer = (file: File): Promise<Uint8Array> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const arrayBuffer = reader.result as ArrayBuffer;
+                console.log("ArrayBuffer Data:", arrayBuffer);
+                resolve(new Uint8Array(arrayBuffer)); // Konversi ke Uint8Array
+            };
+            reader.onerror = (error) => reject(error);
+            reader.readAsArrayBuffer(file); // Konversi file ke ArrayBuffer
+        });
+    };
     const handleFinish = async (values: BooksFormValues) => {
+        setIsSubmitting(true);
         try {
-            console.log("Received values of form:", values);
-
             // Ambil file dari `originFileObj`
             const coverImageFile = values.coverImage[0]?.originFileObj;
-
             if (!coverImageFile) {
                 message.error("Cover image file is missing or invalid.");
                 return;
             }
 
-            // Fungsi untuk konversi file ke ArrayBuffer (format Bytes)
-            const convertFileToArrayBuffer = (file: File): Promise<Uint8Array> => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const arrayBuffer = reader.result as ArrayBuffer;
-                        resolve(new Uint8Array(arrayBuffer)); // Konversi ke Uint8Array
-                    };
-                    reader.onerror = (error) => reject(error);
-                    reader.readAsArrayBuffer(file); // Konversi file ke ArrayBuffer
-                });
-            };
-
             // Konversi coverImage ke Uint8Array
             const coverImageBytes = await convertFileToArrayBuffer(coverImageFile);
-
             // Siapkan payload untuk dikirim ke backend
             const payload = {
                 userId: data?.id, // Pastikan `data` berasal dari context atau Redux
@@ -99,9 +94,13 @@ export default function AddDashboardPage() {
             if (response.status === 201) {
                 message.success("Book created successfully!");
                 setIsModalVisible(true); // Tampilkan modal atau redirect
+                setIsSubmitting(false);
+
             }
         } catch (error: any) {
             console.error("Error submitting the book:", error);
+            setIsSubmitting(false);
+
             message.error(
                 error.response?.data?.error || "Failed to create book. Please try again."
             );
@@ -139,7 +138,7 @@ export default function AddDashboardPage() {
                     <h1 className="font-bold" style={{ fontSize: '24px' }}>
                         Add Book
                     </h1>
-                    <BackToList route='/dashboard' />
+                    <BackToList route="/dashboard"  />
                     <Form
                         layout="vertical"
                         onFinish={handleFinish}
@@ -195,10 +194,19 @@ export default function AddDashboardPage() {
                             ]}
                         >
                             <Upload
-                                accept="image/*" // Hanya gambar
-                                listType="picture-card" // Tampilkan preview
-                                beforeUpload={() => false} // Nonaktifkan upload otomatis
-                                maxCount={1} // Batasi hanya 1 gambar
+                                accept="image/jpeg,image/png"
+                                listType="picture-card"
+                                beforeUpload={(file) => {
+                                    const isValidSize = file.size / 1024 / 1024 < 2; // Batasi ukuran file <= 2MB
+                                    if (!isValidSize) {
+                                        message.error("Image must be smaller than 2MB!");
+                                    }
+                                    return isValidSize || Upload.LIST_IGNORE; // Ignore jika terlalu besar
+                                }}
+                                showUploadList={{
+                                    showPreviewIcon: false, // Hilangkan tombol preview
+                                }}
+                                maxCount={1}
                             >
                                 <div>
                                     <PlusOutlined />
@@ -246,7 +254,7 @@ export default function AddDashboardPage() {
                             <Button
                                 type="primary"
                                 htmlType="submit"
-                            // loading={isSubmitting}
+                                loading={isSubmitting}
                             >
                                 Add Post
                             </Button>

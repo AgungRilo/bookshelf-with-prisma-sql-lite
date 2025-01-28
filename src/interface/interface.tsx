@@ -11,9 +11,24 @@ export interface BooksFormValues {
     status: string;
     isbn: string;
     coverImage: { originFileObj: File }[];
+    // coverImage: string;
     readStatus: string;
     note?: string;
     createdAt?: string;
+    startReadingAt?: string;
+    endReadingAt?: string;
+}
+
+export interface BookDetails {
+    id: number;
+    title: string;
+    author: string;
+    category: string;
+    status: string;
+    isbn: string;
+    coverImage: string; // Base64 string
+    note?: string;
+    createdAt: string;
     startReadingAt?: string;
     endReadingAt?: string;
 }
