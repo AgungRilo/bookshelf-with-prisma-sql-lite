@@ -4,17 +4,10 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
-  console.log('API Hit: /api/books/list');
-  console.log('Request URL:', req.url);
   try {
-
-    const { search, userId, page, limit } = Object.fromEntries(
+    const { search, userId, page, limit, status, category } = Object.fromEntries(
       new URL(req.url).searchParams.entries()
     );
-    console.log("Request params:", { search, userId, page, limit });
-
-
-    console.log('Query Parameters:', { search, userId, page, limit });
 
     if (!userId || isNaN(Number(userId))) {
       return NextResponse.json(
@@ -38,7 +31,8 @@ export async function GET(req: Request) {
     const whereClause: any = {
       userId: parseInt(userId, 10),
     };
-    console.log("search",search)
+
+    // **Filter berdasarkan search (title & author)**
     if (search && search.trim() !== "") {
       whereClause.OR = [
         { title: { contains: search.trim().toLowerCase() } },
@@ -46,7 +40,16 @@ export async function GET(req: Request) {
       ];
     }
 
-    console.log('Where clause:', JSON.stringify(whereClause, null, 2));
+    // **Filter berdasarkan status**
+    if (status && status.trim() !== "") {
+      whereClause.status = status.trim().toLowerCase();
+    }
+
+    // **Filter berdasarkan category**
+    if (category && category.trim() !== "") {
+      whereClause.category = category.trim().toLowerCase();
+    }
+
 
     const books = await prisma.book.findMany({
       where: whereClause,
@@ -61,12 +64,6 @@ export async function GET(req: Request) {
         author: true,
         category: true,
         status: true,
-        // isbn: true,
-        // coverImage: true,
-        // note: true,
-        // createdAt: true,
-        // startReadingAt: true,
-        // endReadingAt: true,
       },
     });
 
@@ -82,7 +79,6 @@ export async function GET(req: Request) {
       },
     });
   } catch (error) {
-    console.error('Error occurred:', error);
     return NextResponse.json(
       { error: 'Failed to fetch books. Please try again later.' },
       { status: 500 }

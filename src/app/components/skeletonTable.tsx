@@ -3,13 +3,13 @@
 import React from 'react';
 import { Skeleton, Table } from 'antd';
 
-const TableSkeleton = ({ rows = 5, columns = 5 }) => {
+const TableSkeleton = ({ rows = 4, columns = 4 }) => {
   // Generate column skeletons dynamically
   const skeletonColumns = Array.from({ length: columns }).map((_, index) => ({
     title: <Skeleton.Input active={true} size="small" />, // Column Header Skeleton
     dataIndex: `col${index}`,
     key: `col${index}`,
-    render: () => <Skeleton title={false} active={true} paragraph={{ rows: 1, width: '100%' }} />, // Cell Skeleton
+    render: () => <Skeleton title={false} active={true} paragraph={{ rows: 1, width: '80%' }} />, // Cell Skeleton
   }));
 
   // Generate data skeleton rows dynamically
@@ -22,6 +22,7 @@ const TableSkeleton = ({ rows = 5, columns = 5 }) => {
 
   return (
     <Table
+      className="w-full"
       columns={skeletonColumns}
       dataSource={skeletonData}
       pagination={false} // Disable pagination for skeleton

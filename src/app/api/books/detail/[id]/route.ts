@@ -43,7 +43,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     // Berikan respon sukses
     return NextResponse.json(book, { status: 200 });
   } catch (error) {
-    console.error('Error fetching book details:', error);
     return NextResponse.json(
       { error: 'Failed to fetch book details. Please try again later.' },
       { status: 500 }

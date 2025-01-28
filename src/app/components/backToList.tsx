@@ -1,6 +1,6 @@
 import { Button } from 'antd';
 import { useRouter } from 'next/navigation';
-
+import { InfoCircleOutlined } from '@ant-design/icons';
 interface BackToListProps {
     route?: string; // Default route untuk kembali
     data?: boolean; // Default
@@ -25,10 +25,12 @@ const BackToList: React.FC<BackToListProps> = ({ route, data, onClick }) => {
                 }}
             >
                 <span style={{ fontSize: '18px' }}>←
-                </span> Back to {`${route === '/dashboard' ? 'Dashboard' : 'Detail'}`}
+                </span> 
+                <span className="hidden sm:inline">Back to {`${route === '/dashboard' ? 'Dashboard' : 'Detail'}`}</span>
+                
             </div>
             {data &&
-                <Button onClick={onClick}>
+                <Button onClick={onClick} icon={<InfoCircleOutlined />}>
                     Reading Progress
                 </Button>
             }

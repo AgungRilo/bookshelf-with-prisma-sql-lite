@@ -29,7 +29,6 @@ export async function DELETE(req: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
     return NextResponse.json(
       { error: 'Failed to delete the book' },
       { status: 500 }

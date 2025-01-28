@@ -10,6 +10,8 @@ import LoadingScreen from "@/app/components/loadingScreen";
 import ReadingProgressModal from "@/app/components/readingProgressModal";
 import { BookDetails } from "@/interface/interface";
 import { useRouter } from 'next/navigation';
+import { convertBytesToBase64, detectMimeType } from "@/app/utils/utils";
+import { BOOK_CATEGORIES, READ_STATUS } from "@/app/constant/constant";
 
 export default function AddDashboardPage() {
     const { id } = useParams();
@@ -17,7 +19,6 @@ export default function AddDashboardPage() {
     const [readingModalVisible, setReadingModalVisible] = useState<boolean>(false);
     const [data, setData] = useState<BookDetails | null>(null);
     const [coverImageBase64, setCoverImageBase64] = useState<string>('');
-    const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();
 
@@ -26,28 +27,6 @@ export default function AddDashboardPage() {
             fetchBookDetails(Number(id));
         }
     }, [id]);
-    const detectMimeType = (bytes: Uint8Array): string => {
-        const header = bytes.slice(0, 4).join(" ");
-        switch (header) {
-            case "137 80 78 71": // Header untuk PNG
-                return "image/png";
-            case "255 216 255 224": // Header untuk JPEG
-            case "255 216 255 225": // Header untuk JPEG dengan EXIF
-                return "image/jpeg";
-            default:
-                throw new Error("Unsupported image format");
-        }
-    };
-
-    const convertBytesToBase64 = (bytes: Uint8Array): string => {
-        let binary = '';
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return btoa(binary); // Mengonversi ke Base64
-    };
-
 
     const fetchBookDetails = async (id: number) => {
         try {
@@ -65,8 +44,7 @@ export default function AddDashboardPage() {
                 setCoverImageBase64(base64Image);
             }
         } catch (error) {
-            console.error('Failed to fetch book details:', error);
-            setError('Failed to fetch book details');
+            message.error('Failed to fetch book details');
         } finally {
             setLoading(false);
         }
@@ -93,6 +71,9 @@ export default function AddDashboardPage() {
     if (loading) {
         return <LoadingScreen />;
     }
+
+    const statusLabel = READ_STATUS.find((status) => status.value === data?.status)?.label || "-";
+    const categoryLabel = BOOK_CATEGORIES.find((category) => category.value === data?.category)?.label || "-";
 
     return (
         <Container>
@@ -121,40 +102,45 @@ export default function AddDashboardPage() {
                             Detail Book
                         </h1>
                         <div className="flex gap-2">
-                            <Button type="primary" onClick={()=>router.push(`/dashboard/edit/${id}`)}>Edit</Button>
+                            <Button type="primary" onClick={() => router.push(`/dashboard/edit/${id}`)}>Edit</Button>
                             <Button type="primary" danger onClick={() => setDeleteModalVisible(true)}>
                                 Delete
                             </Button>
                         </div>
                     </div>
                     <BackToList route='/dashboard' data onClick={onOpen} />
-                    <div className="mt-4 flex flex-wrap">
-                        <div className="w-full md:w-1/2 pr-4">
-                            <h2 className='font-bold'>Title</h2>
-                            <h2>{data?.title ? data.title : "-"}</h2>
-                            <h2 className='font-bold mt-4'>Author</h2>
-                            <h2>{data?.author ? data.author : "-"}</h2>
-                            <h2 className='font-bold mt-4'>Category</h2>
-                            <h2>{data?.category ? <Tag color="blue">{data.category}</Tag> : "-"}</h2>
-                            <h2 className='font-bold mt-4'>Status</h2>
-                            <h2>{data?.status ?
-                                <Tag color={data.status === "completed" ?
-                                    "green" : data.status === "reading" ?
-                                        "yellow" : "red"}>{data.status}
-                                </Tag> : "-"}
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Kolom 1 (Text Information) */}
+                        <div>
+                            <h2 className="font-bold">Title</h2>
+                            <h2>{data?.title || "-"}</h2>
+
+                            <h2 className="font-bold mt-4">Author</h2>
+                            <h2>{data?.author || "-"}</h2>
+
+                            <h2 className="font-bold mt-4">Category</h2>
+                            <h2>{data?.category ? <Tag color="blue">{categoryLabel}</Tag> : "-"}</h2>
+
+                            <h2 className="font-bold mt-4">Status</h2>
+                            <h2>
+                                {data?.status ? (
+                                    <Tag color={data.status === "completed" ? "green" : data.status === "reading" ? "yellow" : "red"}>
+                                        {statusLabel}
+                                    </Tag>
+                                ) : (
+                                    "-"
+                                )}
                             </h2>
                         </div>
-                        <div className="w-full md:w-1/2 pl-4">
-                            <h2 className='font-bold'>Cover Image</h2>
-                            <Image
-                                width={200}
-                                src={coverImageBase64} // Base64 string
-                                alt={`Cover of ${data?.title}`}
-                            />
-                            <h2 className='font-bold mt-4'>Note</h2>
-                            <h2>{data?.note ? data.note : "-"}</h2>
-                        </div>
 
+                        {/* Kolom 2 (Cover Image dan Note) */}
+                        <div>
+                            <h2 className="font-bold">Cover Image</h2>
+                            <Image width={200} src={coverImageBase64} alt={`Cover of ${data?.title}`} />
+
+                            <h2 className="font-bold mt-4">Note</h2>
+                            <h2>{data?.note || "-"}</h2>
+                        </div>
                     </div>
                 </div>
             </Content>

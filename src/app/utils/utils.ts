@@ -3,7 +3,6 @@ export const convertFileToArrayBuffer = (file: File): Promise<Uint8Array> => {
         const reader = new FileReader();
         reader.onload = () => {
             const arrayBuffer = reader.result as ArrayBuffer;
-            console.log("ArrayBuffer Data:", arrayBuffer);
             resolve(new Uint8Array(arrayBuffer)); // Konversi ke Uint8Array
         };
         reader.onerror = (error) => reject(error);

@@ -38,9 +38,7 @@ export async function PUT(req: Request) {
       } else if (typeof coverImage === "string") {
         // Jika base64 string, ubah menjadi Buffer
         coverImageBuffer = Buffer.from(coverImage, 'base64');
-      } else {
-        console.warn("Unexpected coverImage type:", typeof coverImage);
-      }
+      } 
     }
 
 

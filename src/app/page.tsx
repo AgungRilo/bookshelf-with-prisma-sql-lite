@@ -11,14 +11,16 @@ import LoadingScreen from './components/loadingScreen';
 export default function LoginPage() {
   const router = useRouter();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const [loading, setLoading] = useState(false);
-  const [loadingScreen, setLoadingScreen] = useState(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingScreen, setLoadingScreen] = useState<boolean>(true);
 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/dashboard'); // Redirect ke dashboard jika sudah login
+      router.replace('/dashboard'); 
+    }else{
+      router.replace('/')
     }
   }, [isAuthenticated, router]);
 
@@ -31,7 +33,7 @@ export default function LoginPage() {
   }, []);
 
   const onFinish = async (values: { email: string; password: string }) => {
-    setLoading(true); // Indikasi loading
+    setLoading(true); 
     try {
       const response = await axios.post('/api/user/login', values);
 
@@ -54,10 +56,6 @@ export default function LoginPage() {
 
   if (loadingScreen) {
     return <LoadingScreen />;
-  }
-
-  if (isAuthenticated) {
-    return null; // Pastikan halaman login tidak ditampilkan jika sudah login
   }
 
   return (

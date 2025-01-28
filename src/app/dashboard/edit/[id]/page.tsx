@@ -10,26 +10,25 @@ import { PlusOutlined } from '@ant-design/icons';
 import { READ_STATUS, BOOK_CATEGORIES } from '@/app/constant/constant';
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
-import { convertBytesToBase64, detectMimeType } from "@/app/utils/utils";
+import { convertBytesToBase64, convertFileToArrayBuffer, detectMimeType } from "@/app/utils/utils";
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useAppSelector } from '@/redux/hooks';
+import ReadingProgressModal from "@/app/components/readingProgressModal";
 
 export default function EditDashboardPage() {
     const [isModalVisibleConfirm, setIsModalVisibleConfirm] = useState<boolean>(false);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [isFormTouched, setIsFormTouched] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const [coverImageBase64, setCoverImageBase64] = useState<string>('');
     const [dataBook, setDataBook] = useState<BookDetails | null>(null);
-    const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(true);
     const [readStatus, setReadStatus] = useState<any>(null);
-    const router = useRouter();
+    const [readingModalVisible, setReadingModalVisible] = useState<boolean>(false);
     const { Option } = Select;
     const { id } = useParams();
-    const userId = Number(useAppSelector((state) => state.auth.user?.id));
-
     const [form] = Form.useForm();
+    const router = useRouter();
+    const userId = Number(useAppSelector((state) => state.auth.user?.id));
     const handleCancel = () => {
         if (isFormTouched) {
             setIsModalVisibleConfirm(true);
@@ -79,7 +78,6 @@ export default function EditDashboardPage() {
                 isbn: data.isbn,
                 note: data.note,
                 status: data.status,
-                // coverImage:coverImageBase64
             });
             let filteredReadStatus = READ_STATUS.filter(
                 (status) =>
@@ -89,8 +87,7 @@ export default function EditDashboardPage() {
             // Jika ingin mengubah state berdasarkan kondisi
             setReadStatus(filteredReadStatus);
         } catch (error) {
-            console.error('Failed to fetch book details:', error);
-            setError('Failed to fetch book details');
+            message.error('Failed to fetch book details')
         } finally {
             setLoading(false);
         }
@@ -98,25 +95,15 @@ export default function EditDashboardPage() {
     const handleFormChange = () => {
         setIsFormTouched(true);
     };
-    const convertFileToArrayBuffer = (file: File): Promise<Uint8Array> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const arrayBuffer = reader.result as ArrayBuffer;
-                resolve(new Uint8Array(arrayBuffer)); // Konversi ke Uint8Array
-            };
-            reader.onerror = (error) => reject(error);
-            reader.readAsArrayBuffer(file); // Konversi file ke ArrayBuffer
-        });
-    };
+
     const handleFinish = async (values: BooksFormValues) => {
         try {
             setIsSubmitting(true);
             let coverImageBytes;
-    
+
             // **Cek apakah user mengunggah gambar baru**
             const coverImageFile = values.coverImage?.[0]?.originFileObj;
-    
+
             if (coverImageFile) {
                 // Jika ada file baru, konversi ke Uint8Array
                 coverImageBytes = await convertFileToArrayBuffer(coverImageFile);
@@ -124,10 +111,9 @@ export default function EditDashboardPage() {
                 // Jika tidak ada file baru, gunakan coverImage dari database
                 coverImageBytes = dataBook.coverImage;
             }
-    
+
             // **Siapkan payload**
-            const gmt7Date = new Date(Date.now() + 7 * 60 * 60 * 1000); // Waktu GMT+7
-    
+            const gmt7Date = new Date(Date.now()); // Waktu GMT+7
             const payload = {
                 id: Number(id),
                 userId: Number(userId), // Pastikan userId dikirim sebagai integer
@@ -136,48 +122,64 @@ export default function EditDashboardPage() {
                 category: values.category,
                 status: values.status,
                 isbn: values.isbn,
-                coverImage: coverImageBytes instanceof Uint8Array 
-                    ? Array.from(coverImageBytes) 
+                coverImage: coverImageBytes instanceof Uint8Array
+                    ? Array.from(coverImageBytes)
                     : coverImageBytes, // Kirim hanya jika ada gambar
                 note: values.note || "", // Note tetap dikirim meskipun kosong
                 startReadingAt: values.status === "reading" ? gmt7Date : dataBook?.startReadingAt,
                 endReadingAt: values.status === "completed" ? gmt7Date : dataBook?.endReadingAt,
             };
-    
-            console.log("Payload being sent:", payload);
-    
+
+
             // **Kirim data ke backend**
             const response = await axios.put('/api/books/edit', payload);
-    
+
             if (response.status === 200) {
                 message.success("Book updated successfully!");
                 setIsModalVisible(true);
                 setIsSubmitting(false);
-                router.push('/dashboard');
             }
         } catch (error: any) {
-            console.error("Error submitting the book:", error);
             setIsSubmitting(false);
             message.error(
                 error.response?.data?.error || "Failed to update book. Please try again."
             );
         }
     };
-    
+    const handleModalCancel = () => {
+        setIsModalVisibleConfirm(false);
+    };
+
+    const handleModalOk = () => {
+        setIsModalVisibleConfirm(false);
+        router.push('/dashboard');
+    };
+
+    const handleOk = () => {
+        setIsModalVisible(false);
+        router.push('/dashboard');
+    };
+    const onClose = () => {
+        setReadingModalVisible(false);
+    }
+
+    const onOpen = () => {
+        setReadingModalVisible(true);
+    }
     if (loading) {
         return <LoadingScreen />;
     }
     return (
         <Container>
-            {/* <Modal
+            <Modal
                 title="Confirm Navigation"
                 open={isModalVisibleConfirm}
                 onOk={handleModalOk}
                 onCancel={handleModalCancel}
             >
                 <p>Are you sure you want to leave this page? Unsaved changes will be lost.</p>
-            </Modal> */}
-            {/* <Modal
+            </Modal>
+            <Modal
                 title="Success"
                 open={isModalVisible}
                 onOk={handleOk}
@@ -189,24 +191,25 @@ export default function EditDashboardPage() {
                 ]}
             >
                 <p>The book has been successfully edited!</p>
-            </Modal> */}
+            </Modal>
+            <ReadingProgressModal
+                open={readingModalVisible}
+                onClose={onClose}
+                createdAt={dataBook?.createdAt ?? null}
+                startReadingAt={dataBook?.startReadingAt ?? null}
+                endReadingAt={dataBook?.endReadingAt ?? null}
+            />
             <div style={{ height: '90vh' }}>
-                <Content className="m-4" style={{
-                    overflowY: 'auto', // Mengaktifkan scrolling
-                    maxHeight: 'calc(90vh - 64px)', // Sesuaikan dengan header jika ada
-                    padding: '20px',
-                    background: '#fff'
-                }} >
+                <Content className="m-4 overflow-y-auto max-h-[calc(90vh-64px)] p-5 bg-white" >
                     <div className="p-4 bg-white rounded-md shadow-sm">
                         <h1 className="font-bold" style={{ fontSize: '24px' }}>
                             Edit Book
                         </h1>
-                        <BackToList route='/dashboard' data />
+                        <BackToList route='/dashboard' data onClick={onOpen} />
                         <Form
                             form={form}
                             layout="vertical"
                             onFinish={handleFinish}
-                            // initialValues={{ status: "unread" }}
                             style={{ marginTop: '20px' }}
                             onValuesChange={handleFormChange}
                         >
@@ -313,7 +316,12 @@ export default function EditDashboardPage() {
                             </Form.Item>
 
                             <div className="flex justify-end gap-4">
-                                <Button onClick={handleCancel}>Cancel</Button>
+                                <Button
+                                    loading={isSubmitting}
+                                    onClick={handleCancel}
+                                >
+                                    Cancel
+                                </Button>
                                 <Button
                                     type="primary"
                                     htmlType="submit"

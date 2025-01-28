@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Layout, Button, Table, Tag, Input, Space, Pagination, message, Skeleton, Modal } from 'antd';
+import { Layout, Button, Table, Tag, Input, Space, Pagination, message, Modal, Select } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import LoadingScreen from '../components/loadingScreen';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Container from '../components/container';
@@ -13,12 +12,12 @@ import { BooksFormValues } from '@/interface/interface';
 import { useAppSelector } from '@/redux/hooks';
 import { SearchOutlined } from '@ant-design/icons';
 import TableSkeleton from '../components/skeletonTable';
-const { Content } = Layout;
+import { BOOK_CATEGORIES, READ_STATUS } from '../constant/constant';
 
 export default function DashboardPage() {
-  const [loading, setLoading] = useState<boolean>(false);
   const [loadingTable, setLoadingTable] = useState<boolean>(false);
-
+  const [category, setCategory] = useState<string | undefined>(undefined);
+  const [status, setStatus] = useState<string | undefined>(undefined);
   const [books, setBooks] = useState<BooksFormValues[]>([]);
   const [search, setSearch] = useState<string>(''); // Input langsung dari pengguna
   const [debouncedSearch, setDebouncedSearch] = useState<string>(''); // Nilai pencarian dengan debounce
@@ -38,9 +37,10 @@ export default function DashboardPage() {
   });
   const router = useRouter();
   const userId = useAppSelector((state) => state.auth.user?.id);
+  const { Option } = Select
+  const { Content } = Layout;
 
-  const fetchBooks = async (userId: number, page: number, limit: number, search: string) => {
-
+  const fetchBooks = async (userId: number, page: number, limit: number, search: string, category?: string, status?: string) => {
     try {
       setLoadingTable(true);
       const response = await axios.get('/api/books/list', {
@@ -49,6 +49,8 @@ export default function DashboardPage() {
           page,
           limit,
           search,
+          category: category || undefined, // Jangan kirim jika kosong
+          status: status || undefined, // Jangan kirim jika kosong
         },
       });
       const { data, pagination } = response.data;
@@ -62,23 +64,27 @@ export default function DashboardPage() {
   };
 
   const fetchStats = async () => {
+    if (!userId) return; 
+  
     try {
-      const response = await axios.get('/api/user/stats');
+      const response = await axios.get('/api/user/stats', {
+        params: { userId }, 
+      });
       setStats(response.data);
     } catch (error) {
-      console.error('Failed to fetch stats:', error);
+      message.error('Failed to get stats');
     }
   };
 
   // Debounce untuk input pencarian
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedSearch(search); // Update nilai debounced setelah delay
+      setDebouncedSearch(search);
       setPage(1);
     }, 500);
 
     return () => {
-      clearTimeout(handler); // Bersihkan timeout jika input berubah sebelum selesai
+      clearTimeout(handler);
     };
   }, [search]);
 
@@ -89,13 +95,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (userId) {
-      fetchBooks(Number(userId), page, pageSize, debouncedSearch);
+      fetchBooks(Number(userId), page, pageSize, debouncedSearch, category, status);
     }
-  }, [userId, page, pageSize, debouncedSearch]);
+  }, [userId, page, pageSize, debouncedSearch, category, status]); // Pastikan `category` & `status` dipantau
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (userId) {
+      fetchStats();
+    }
+  }, [userId]);
 
   const handleAdd = () => {
     router.push('/dashboard/add');
@@ -110,9 +118,8 @@ export default function DashboardPage() {
     try {
       await axios.delete(`/api/books/delete?id=${bookId}`);
       message.success('Book deleted successfully');
-      fetchBooks(Number(userId), page, pageSize, search); 
+      fetchBooks(Number(userId), page, pageSize, search);
     } catch (error) {
-      console.error('Failed to delete book:', error);
       message.error('Failed to delete book');
     }
   };
@@ -120,7 +127,6 @@ export default function DashboardPage() {
   const goToDetail = (id: number) => {
     router.push(`/dashboard/detail/${id}`);
   };
-
 
   const columns = [
     {
@@ -139,15 +145,22 @@ export default function DashboardPage() {
       title: 'Category',
       dataIndex: 'category',
       key: 'category',
-      render: (text: string) => <Tag color="blue">{text}</Tag>,
+      render: (text: string) => {
+        const categoryLabel = BOOK_CATEGORIES.find((cat) => cat.value === text)?.label || "Unknown";
+        return <Tag color="blue">{categoryLabel}</Tag>;
+      },
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (text: string) => {
-        const color = text === 'completed' ? 'green' : text === 'reading' ? 'orange' : 'red';
-        return <Tag color={color}>{text}</Tag>;
+        const statusObj = READ_STATUS.find((status) => status.value === text);
+        const label = statusObj ? statusObj.label : "Unknown";
+        const color =
+          text === "completed" ? "green" : text === "reading" ? "orange" : "red";
+
+        return <Tag color={color}>{label}</Tag>;
       },
     },
     {
@@ -178,10 +191,6 @@ export default function DashboardPage() {
     },
   ];
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   return (
     <Container>
       <Content className="m-4">
@@ -190,14 +199,43 @@ export default function DashboardPage() {
             Dashboard
           </h1>
           <div className="flex flex-col sm:flex-row sm:justify-between mb-6 gap-4">
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="Search by Title or Author"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              allowClear
-              className="w-full sm:w-auto"
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <Input
+                prefix={<SearchOutlined />}
+                placeholder="Search by Title or Author"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                allowClear
+                className="w-full"
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Select
+                  placeholder="Filter by Category"
+                  value={category}
+                  onChange={(value) => setCategory(value)}
+                  className="w-full"
+                  allowClear
+                >
+                  {BOOK_CATEGORIES.map((cat) => (
+                    <Option key={cat.value} value={cat.value}>{cat.label}</Option>
+                  ))}
+                </Select>
+
+                <Select
+                  placeholder="Filter by Status"
+                  value={status}
+                  onChange={(value) => setStatus(value)}
+                  className="w-full"
+                  allowClear
+                >
+                  {READ_STATUS.map((stat) => (
+                    <Option key={stat.value} value={stat.value}>{stat.label}</Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
+
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
               Add Book
             </Button>

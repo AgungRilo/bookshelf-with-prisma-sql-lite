@@ -11,6 +11,7 @@ import { READ_STATUS, BOOK_CATEGORIES } from '@/app/constant/constant';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAppSelector } from '@/redux/hooks';
+import { convertFileToArrayBuffer } from '@/app/utils/utils';
 
 export default function AddDashboardPage() {
     const [isModalVisibleConfirm, setIsModalVisibleConfirm] = useState<boolean>(false);
@@ -47,18 +48,7 @@ export default function AddDashboardPage() {
     const handleModalCancel = () => {
         setIsModalVisibleConfirm(false);
     };
-    const convertFileToArrayBuffer = (file: File): Promise<Uint8Array> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                const arrayBuffer = reader.result as ArrayBuffer;
-                console.log("ArrayBuffer Data:", arrayBuffer);
-                resolve(new Uint8Array(arrayBuffer)); // Konversi ke Uint8Array
-            };
-            reader.onerror = (error) => reject(error);
-            reader.readAsArrayBuffer(file); // Konversi file ke ArrayBuffer
-        });
-    };
+
     const handleFinish = async (values: BooksFormValues) => {
         setIsSubmitting(true);
         try {
@@ -98,7 +88,6 @@ export default function AddDashboardPage() {
 
             }
         } catch (error: any) {
-            console.error("Error submitting the book:", error);
             setIsSubmitting(false);
 
             message.error(
@@ -106,9 +95,6 @@ export default function AddDashboardPage() {
             );
         }
     };
-
-
-
 
     return (
         <Container>
@@ -133,136 +119,144 @@ export default function AddDashboardPage() {
             >
                 <p>The book has been successfully added!</p>
             </Modal>
-            <Content className="m-4">
-                <div className="p-4 bg-white rounded-md shadow-sm">
-                    <h1 className="font-bold" style={{ fontSize: '24px' }}>
-                        Add Book
-                    </h1>
-                    <BackToList route="/dashboard"  />
-                    <Form
-                        layout="vertical"
-                        onFinish={handleFinish}
-                        initialValues={{ status: "unread" }}
-                        style={{ marginTop: '20px' }}
-                        onValuesChange={handleFormChange}
+            <div style={{ height: '90vh' }}>
+                <Content className="m-4 overflow-y-auto max-h-[calc(90vh-64px)] p-5 bg-white">
+                    <div className="p-4 bg-white rounded-md shadow-sm">
+                        <h1 className="font-bold" style={{ fontSize: '24px' }}>
+                            Add Book
+                        </h1>
+                        <BackToList route="/dashboard" />
+                        <Form
+                            layout="vertical"
+                            onFinish={handleFinish}
+                            initialValues={{ status: "unread" }}
+                            style={{ marginTop: '20px' }}
+                            onValuesChange={handleFormChange}
 
-                    >
-                        <Form.Item
-                            label="Title"
-                            name="title"
-                            rules={[
-                                { required: true, message: 'Title is required!' },
-                                { max: 100, message: 'Title must be less than 100 characters!' },
-                            ]}
                         >
-                            <Input placeholder="Please enter book title" />
-                        </Form.Item>
-                        <Form.Item
-                            label="Author"
-                            name="author"
-                            rules={[
-                                { required: true, message: 'Title is required!' },
-                                { max: 100, message: 'Title must be less than 100 characters!' },
-                            ]}
-                        >
-                            <Input placeholder="Please enter book author" />
-                        </Form.Item>
-                        <Form.Item
-                            label="ISBN"
-                            name="isbn"
-                            rules={[
-                                { required: true, message: 'ISBN is required!' },
-                                {
-                                    pattern: /^(?:\d{9}X|\d{10}|\d{13})$/,
-                                    message: "Invalid ISBN! Must be ISBN-10 or ISBN-13 format.",
-                                },
-                            ]}
-                            normalize={(value) => value.replace(/[-\s]/g, "")}
-                        >
-                            <Input placeholder="Please enter book ISBN" />
-                        </Form.Item>
-                        <Form.Item
-                            label="Cover Image"
-                            name="coverImage"
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "Please upload a cover image!",
-                                },
-                            ]}
-                        >
-                            <Upload
-                                accept="image/jpeg,image/png"
-                                listType="picture-card"
-                                beforeUpload={(file) => {
-                                    const isValidSize = file.size / 1024 / 1024 < 2; // Batasi ukuran file <= 2MB
-                                    if (!isValidSize) {
-                                        message.error("Image must be smaller than 2MB!");
-                                    }
-                                    return isValidSize || Upload.LIST_IGNORE; // Ignore jika terlalu besar
-                                }}
-                                showUploadList={{
-                                    showPreviewIcon: false, // Hilangkan tombol preview
-                                }}
-                                maxCount={1}
+                            <Form.Item
+                                label="Title"
+                                name="title"
+                                rules={[
+                                    { required: true, message: 'Title is required!' },
+                                    { max: 100, message: 'Title must be less than 100 characters!' },
+                                ]}
                             >
-                                <div>
-                                    <PlusOutlined />
-                                    <div style={{ marginTop: 8 }}>Upload</div>
-                                </div>
-                            </Upload>
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Category"
-                            name="category"
-                            rules={[{ required: true, message: "Please select a category!" }]}
-                        >
-                            <Select placeholder="Select a category" loading={!BOOK_CATEGORIES.length}>
-                                {BOOK_CATEGORIES.map((category) => (
-                                    <Option key={category.value} value={category.value}>
-                                        {category.label}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item
-                            label="Read Status"
-                            name="status"
-                            rules={[{ required: true, message: "Please select a read status!" }]}
-                        >
-                            <Select disabled placeholder="Select a read status">
-                                {READ_STATUS.map((status) => (
-                                    <Option key={status.value} value={status.value}>
-                                        {status.label}
-                                    </Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item
-                            label="Note"
-                            name="note"
-                            rules={[{ required: false, message: "" }]}
-                        >
-                            <Input.TextArea placeholder="Please enter book note" />
-                        </Form.Item>
-
-                        <div className="flex justify-end gap-4">
-                            <Button onClick={handleCancel}>Cancel</Button>
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                loading={isSubmitting}
+                                <Input placeholder="Please enter book title" />
+                            </Form.Item>
+                            <Form.Item
+                                label="Author"
+                                name="author"
+                                rules={[
+                                    { required: true, message: 'Title is required!' },
+                                    { max: 100, message: 'Title must be less than 100 characters!' },
+                                ]}
                             >
-                                Add Post
-                            </Button>
-                        </div>
-                    </Form>
-                </div>
-            </Content>
+                                <Input placeholder="Please enter book author" />
+                            </Form.Item>
+                            <Form.Item
+                                label="ISBN"
+                                name="isbn"
+                                rules={[
+                                    { required: true, message: 'ISBN is required!' },
+                                    {
+                                        pattern: /^(?:\d{9}X|\d{10}|\d{13})$/,
+                                        message: "Invalid ISBN! Must be ISBN-10 or ISBN-13 format.",
+                                    },
+                                ]}
+                                normalize={(value) => value.replace(/[-\s]/g, "")}
+                            >
+                                <Input placeholder="Please enter book ISBN" />
+                            </Form.Item>
+                            <Form.Item
+                                label="Cover Image"
+                                name="coverImage"
+                                valuePropName="fileList"
+                                getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "Please upload a cover image!",
+                                    },
+                                ]}
+                            >
+                                <Upload
+                                    accept="image/jpeg,image/png"
+                                    listType="picture-card"
+                                    beforeUpload={(file) => {
+                                        const isValidSize = file.size / 1024 / 1024 < 2; // Batasi ukuran file <= 2MB
+                                        if (!isValidSize) {
+                                            message.error("Image must be smaller than 2MB!");
+                                        }
+                                        return isValidSize || Upload.LIST_IGNORE; // Ignore jika terlalu besar
+                                    }}
+                                    showUploadList={{
+                                        showPreviewIcon: false, // Hilangkan tombol preview
+                                    }}
+                                    maxCount={1}
+                                >
+                                    <div>
+                                        <PlusOutlined />
+                                        <div style={{ marginTop: 8 }}>Upload</div>
+                                    </div>
+                                </Upload>
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Category"
+                                name="category"
+                                rules={[{ required: true, message: "Please select a category!" }]}
+                            >
+                                <Select placeholder="Select a category" loading={!BOOK_CATEGORIES.length}>
+                                    {BOOK_CATEGORIES.map((category) => (
+                                        <Option key={category.value} value={category.value}>
+                                            {category.label}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                label="Read Status"
+                                name="status"
+                                rules={[{ required: true, message: "Please select a read status!" }]}
+                            >
+                                <Select disabled placeholder="Select a read status">
+                                    {READ_STATUS.map((status) => (
+                                        <Option key={status.value} value={status.value}>
+                                            {status.label}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                            <Form.Item
+                                label="Note"
+                                name="note"
+                                rules={[{ required: false, message: "" }]}
+                            >
+                                <Input.TextArea placeholder="Please enter book note" />
+                            </Form.Item>
+
+                            <div className="flex justify-end gap-4">
+                                <Button
+                                    loading={isSubmitting}
+                                    onClick={handleCancel}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={isSubmitting}
+                                >
+                                    Add Post
+                                </Button>
+                            </div>
+
+                        </Form>
+                    </div>
+
+                </Content>
+            </div>
         </Container>
     )
-
 }

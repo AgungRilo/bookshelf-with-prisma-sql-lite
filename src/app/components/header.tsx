@@ -27,18 +27,18 @@ const Header: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setIsModalVisible(false); 
+    setIsModalVisible(false);
   };
 
   const handleLogout = () => {
     dispatch(logout());
-    router.push('/');
+    window.location.href = '/';
   };
 
   return (
-    <AntdHeader className="bg-white px-4 flex justify-between items-center">
-      <div>
-        <strong>Welcome, {data?.username}!</strong>
+    <AntdHeader className="bg-white px-4 py-3 flex flex-wrap justify-between items-center shadow-sm">
+      <div className="text-lg font-semibold text-gray-800">
+        Welcome, <span className="text-blue-600">{data?.username}</span>!
       </div>
       <Modal
         title="Confirm Logout"
@@ -52,14 +52,15 @@ const Header: React.FC = () => {
       >
         <p>Are you sure you want to log out?</p>
       </Modal>
-      <Space>
+      <Space size="middle" className="flex items-center">
         <Switch
           checkedChildren={<BulbFilled />}
           unCheckedChildren={<BulbOutlined />}
           onChange={toggleDarkMode}
+          className="border-gray-300"
         />
-        <Button icon={<LogoutOutlined />} danger onClick={showModal}>
-          Logout
+        <Button icon={<LogoutOutlined />} danger onClick={showModal} className="px-4">
+        <span className="hidden sm:inline">Logout</span>
         </Button>
       </Space>
     </AntdHeader>

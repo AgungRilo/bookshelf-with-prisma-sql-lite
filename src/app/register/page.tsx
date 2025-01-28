@@ -10,33 +10,33 @@ import axios from 'axios';
 export default function RegisterPage() {
   const router = useRouter();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/dashboard'); 
+      router.push('/dashboard');
     }
   }, [isAuthenticated, router]);
 
 
-const onFinish = async (values: RegisterFormValues) => {
-  setLoading(true);
-  try {
-    const response = await axios.post('/api/user/register', values);
+  const onFinish = async (values: RegisterFormValues) => {
+    setLoading(true);
+    try {
+      const response = await axios.post('/api/user/register', values);
 
-    if (response.status === 200) {
-      message.success('Registration successful!');
-      router.push('/'); 
+      if (response.status === 200) {
+        message.success('Registration successful!');
+        router.push('/');
+      }
+    } catch (error: any) {
+      if (error.response) {
+        message.error(error.response.data.error || 'Registration failed');
+      } else {
+        message.error('Something went wrong');
+      }
+    } finally {
+      setLoading(false);
     }
-  } catch (error: any) {
-    if (error.response) {
-      message.error(error.response.data.error || 'Registration failed'); 
-    } else {
-      message.error('Something went wrong'); 
-    }
-  } finally {
-    setLoading(false); 
-  }
-};
+  };
 
 
   return (
