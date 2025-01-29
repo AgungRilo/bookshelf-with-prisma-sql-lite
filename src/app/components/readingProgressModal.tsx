@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Modal, Button, Timeline } from "antd";
+import React from "react";
+import { Modal, Timeline } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -9,8 +9,9 @@ type ReadingProgressModalProps = {
     createdAt: string | null;
     startReadingAt: string | null;
     endReadingAt: string | null;
-    open: boolean; 
+    open: boolean;
     onClose: () => void;
+    isDarkMode?: boolean;
 };
 
 const ReadingProgressModal: React.FC<ReadingProgressModalProps> = ({
@@ -19,19 +20,18 @@ const ReadingProgressModal: React.FC<ReadingProgressModalProps> = ({
     createdAt,
     startReadingAt,
     endReadingAt,
+    isDarkMode
 }) => {
-
-
     const getRelativeTime = (start: string | null, end: string | null): string => {
         if (!start || !end) return "N/A";
         return dayjs(start).to(dayjs(end));
     };
-
     return (
         <>
             <Modal
                 title="Reading Progress"
                 open={open}
+                className={isDarkMode ? "custom-modal" : ""}
                 onCancel={onClose}
                 footer={null}
             >

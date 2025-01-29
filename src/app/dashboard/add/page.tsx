@@ -12,6 +12,8 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useAppSelector } from '@/redux/hooks';
 import { convertFileToArrayBuffer } from '@/app/utils/utils';
+import { useTheme } from "@/context/ThemeContext";
+import ConfirmModal from '@/app/components/modalConfirmation';
 
 export default function AddDashboardPage() {
     const [isModalVisibleConfirm, setIsModalVisibleConfirm] = useState<boolean>(false);
@@ -21,6 +23,8 @@ export default function AddDashboardPage() {
     const data = useAppSelector((state) => state.auth.user);
     const router = useRouter();
     const { Option } = Select;
+    const { theme } = useTheme();
+    const isDarkMode = theme === 'dark';
 
     const handleFormChange = () => {
         setIsFormTouched(true);
@@ -98,14 +102,19 @@ export default function AddDashboardPage() {
 
     return (
         <Container>
-            <Modal
-                title="Confirm Navigation"
-                open={isModalVisibleConfirm}
-                onOk={handleModalOk}
+            <ConfirmModal
+                isVisible={isModalVisibleConfirm}
+                setIsVisible={setIsModalVisible}
+                onConfirm={handleModalOk}
+                title="Confirm Leave Page"
+                message="Are you sure you want to leave this page? Unsaved changes will be lost."
+                confirmText="Yes, leave this page"
+                confirmDanger={true} // Tombol merah seperti `danger: true`
+                cancelText="Cancel"
+                isDarkMode={isDarkMode}
                 onCancel={handleModalCancel}
-            >
-                <p>Are you sure you want to leave this page? Unsaved changes will be lost.</p>
-            </Modal>
+                closable={false} // Tidak bisa ditutup tanpa tombol
+            />
             <Modal
                 title="Success"
                 open={isModalVisible}
@@ -121,11 +130,11 @@ export default function AddDashboardPage() {
             </Modal>
             <div style={{ height: '90vh' }}>
                 <Content className="m-4 overflow-y-auto max-h-[calc(90vh-64px)] p-5 bg-white">
-                    <div className="p-4 bg-white rounded-md shadow-sm">
+                    <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "} rounded-md shadow-sm `}>
                         <h1 className="font-bold" style={{ fontSize: '24px' }}>
                             Add Book
                         </h1>
-                        <BackToList route="/dashboard" />
+                        <BackToList route="/dashboard" onCancel={handleCancel} />
                         <Form
                             layout="vertical"
                             onFinish={handleFinish}
@@ -207,7 +216,7 @@ export default function AddDashboardPage() {
                                 name="category"
                                 rules={[{ required: true, message: "Please select a category!" }]}
                             >
-                                <Select placeholder="Select a category" loading={!BOOK_CATEGORIES.length}>
+                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'} placeholder="Select a category" loading={!BOOK_CATEGORIES.length}>
                                     {BOOK_CATEGORIES.map((category) => (
                                         <Option key={category.value} value={category.value}>
                                             {category.label}
@@ -220,7 +229,7 @@ export default function AddDashboardPage() {
                                 name="status"
                                 rules={[{ required: true, message: "Please select a read status!" }]}
                             >
-                                <Select disabled placeholder="Select a read status">
+                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'}  disabled placeholder="Select a read status">
                                     {READ_STATUS.map((status) => (
                                         <Option key={status.value} value={status.value}>
                                             {status.label}
@@ -240,6 +249,7 @@ export default function AddDashboardPage() {
                                 <Button
                                     loading={isSubmitting}
                                     onClick={handleCancel}
+                                    className='text-black'
                                 >
                                     Cancel
                                 </Button>

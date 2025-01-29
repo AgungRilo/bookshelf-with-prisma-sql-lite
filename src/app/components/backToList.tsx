@@ -5,14 +5,15 @@ interface BackToListProps {
     route?: string; // Default route untuk kembali
     data?: boolean; // Default
     onClick?: () => void;
+    onCancel?: () => void;
 }
 
-const BackToList: React.FC<BackToListProps> = ({ route, data, onClick }) => {
+const BackToList: React.FC<BackToListProps> = ({ route, data, onClick, onCancel }) => {
     const router = useRouter();
     return (
         <div className='flex justify-between'>
             <div
-                onClick={() => router.push(route || '/dashboard')}
+                onClick={onCancel ?  onCancel:() => router.push(route || '/dashboard')}
                 style={{
                     background: 'none',
                     border: 'none',
@@ -30,7 +31,7 @@ const BackToList: React.FC<BackToListProps> = ({ route, data, onClick }) => {
                 
             </div>
             {data &&
-                <Button onClick={onClick} icon={<InfoCircleOutlined />}>
+                <Button onClick={onClick} color="green" variant='outlined' icon={<InfoCircleOutlined />}>
                     Reading Progress
                 </Button>
             }

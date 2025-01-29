@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import BackToList from '@/app/components/backToList';
 import Container from '@/app/components/container';
 import { BookDetails, BooksFormValues } from '@/interface/interface';
@@ -14,6 +14,8 @@ import { convertBytesToBase64, convertFileToArrayBuffer, detectMimeType } from "
 import LoadingScreen from "@/app/components/loadingScreen";
 import { useAppSelector } from '@/redux/hooks';
 import ReadingProgressModal from "@/app/components/readingProgressModal";
+import { useTheme } from "@/context/ThemeContext";
+import ConfirmModal from "@/app/components/modalConfirmation";
 
 export default function EditDashboardPage() {
     const [isModalVisibleConfirm, setIsModalVisibleConfirm] = useState<boolean>(false);
@@ -28,6 +30,8 @@ export default function EditDashboardPage() {
     const { id } = useParams();
     const [form] = Form.useForm();
     const router = useRouter();
+    const { theme } = useTheme();
+    const isDarkMode = theme === 'dark';
     const userId = Number(useAppSelector((state) => state.auth.user?.id));
     const handleCancel = () => {
         if (isFormTouched) {
@@ -171,14 +175,19 @@ export default function EditDashboardPage() {
     }
     return (
         <Container>
-            <Modal
-                title="Confirm Navigation"
-                open={isModalVisibleConfirm}
-                onOk={handleModalOk}
+            <ConfirmModal
+                isVisible={isModalVisibleConfirm}
+                setIsVisible={setIsModalVisible}
+                onConfirm={handleModalOk}
+                title="Confirm Leave Page"
+                message="Are you sure you want to leave this page? Unsaved changes will be lost."
+                confirmText="Yes, leave this page"
+                confirmDanger={true} // Tombol merah seperti `danger: true`
+                cancelText="Cancel"
+                isDarkMode={isDarkMode}
                 onCancel={handleModalCancel}
-            >
-                <p>Are you sure you want to leave this page? Unsaved changes will be lost.</p>
-            </Modal>
+                closable={false} // Tidak bisa ditutup tanpa tombol
+            />
             <Modal
                 title="Success"
                 open={isModalVisible}
@@ -193,6 +202,7 @@ export default function EditDashboardPage() {
                 <p>The book has been successfully edited!</p>
             </Modal>
             <ReadingProgressModal
+                isDarkMode={isDarkMode}
                 open={readingModalVisible}
                 onClose={onClose}
                 createdAt={dataBook?.createdAt ?? null}
@@ -201,11 +211,11 @@ export default function EditDashboardPage() {
             />
             <div style={{ height: '90vh' }}>
                 <Content className="m-4 overflow-y-auto max-h-[calc(90vh-64px)] p-5 bg-white" >
-                    <div className="p-4 bg-white rounded-md shadow-sm">
+                    <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "} rounded-md shadow-sm `}>
                         <h1 className="font-bold" style={{ fontSize: '24px' }}>
                             Edit Book
                         </h1>
-                        <BackToList route='/dashboard' data onClick={onOpen} />
+                        <BackToList route="/dashboard" onCancel={handleCancel} data onClick={onOpen} />
                         <Form
                             form={form}
                             layout="vertical"
@@ -286,7 +296,7 @@ export default function EditDashboardPage() {
                                 name="category"
                                 rules={[{ required: true, message: "Please select a category!" }]}
                             >
-                                <Select placeholder="Select a category" loading={!BOOK_CATEGORIES.length}>
+                                <Select placeholder="Select a category" loading={!BOOK_CATEGORIES.length} className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'}>
                                     {BOOK_CATEGORIES.map((category) => (
                                         <Option key={category.value} value={category.value}>
                                             {category.label}
@@ -299,8 +309,8 @@ export default function EditDashboardPage() {
                                 name="status"
                                 rules={[{ required: true, message: "Please select a read status!" }]}
                             >
-                                <Select disabled={dataBook?.status === 'completed'} placeholder="Select a read status">
-                                    {readStatus.map((status: any) => (
+                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'} disabled={dataBook?.status === 'completed'} placeholder="Select a read status">
+                                    {readStatus?.map((status: any) => (
                                         <Option key={status.value} value={status.value}>
                                             {status.label}
                                         </Option>
@@ -319,6 +329,7 @@ export default function EditDashboardPage() {
                                 <Button
                                     loading={isSubmitting}
                                     onClick={handleCancel}
+                                    className='text-black'
                                 >
                                     Cancel
                                 </Button>

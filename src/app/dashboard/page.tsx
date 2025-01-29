@@ -13,9 +13,12 @@ import { useAppSelector } from '@/redux/hooks';
 import { SearchOutlined } from '@ant-design/icons';
 import TableSkeleton from '../components/skeletonTable';
 import { BOOK_CATEGORIES, READ_STATUS } from '../constant/constant';
-
+import LoadingScreen from '../components/loadingScreen';
+import { useTheme } from "@/context/ThemeContext";
+import ConfirmModal from '../components/modalConfirmation';
 export default function DashboardPage() {
   const [loadingTable, setLoadingTable] = useState<boolean>(false);
+  const [loadingScreen, setLoadingScreen] = useState<boolean>(true);
   const [category, setCategory] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<string | undefined>(undefined);
   const [books, setBooks] = useState<BooksFormValues[]>([]);
@@ -25,6 +28,8 @@ export default function DashboardPage() {
   const [pageSize, setPageSize] = useState<number>(10);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
   const [bookToDelete, setBookToDelete] = useState<number | null>(null);
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
   const [pagination, setPagination] = useState({
     total: 0,
     current: 1,
@@ -41,6 +46,7 @@ export default function DashboardPage() {
   const { Content } = Layout;
 
   const fetchBooks = async (userId: number, page: number, limit: number, search: string, category?: string, status?: string) => {
+    const controller = new AbortController();
     try {
       setLoadingTable(true);
       const response = await axios.get('/api/books/list', {
@@ -61,19 +67,22 @@ export default function DashboardPage() {
     } finally {
       setLoadingTable(false);
     }
+    return () => controller.abort(); 
   };
 
   const fetchStats = async () => {
-    if (!userId) return; 
-  
+    const controller = new AbortController();
+    if (!userId) return;
+
     try {
       const response = await axios.get('/api/user/stats', {
-        params: { userId }, 
+        params: { userId },
       });
       setStats(response.data);
     } catch (error) {
       message.error('Failed to get stats');
     }
+    return () => controller.abort();
   };
 
   // Debounce untuk input pencarian
@@ -104,6 +113,14 @@ export default function DashboardPage() {
       fetchStats();
     }
   }, [userId]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoadingScreen(false);
+    }, 500); // Hilangkan loading screen setelah 500ms
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAdd = () => {
     router.push('/dashboard/add');
@@ -191,10 +208,14 @@ export default function DashboardPage() {
     },
   ];
 
+  if (loadingScreen) {
+    return <LoadingScreen />;
+  }
+
   return (
     <Container>
       <Content className="m-4">
-        <div className="p-4 bg-white rounded-md shadow-sm">
+        <div className={`p-4 ${theme === "dark" ? 'bg-black' : 'bg-white'} rounded-md shadow-sm`}>
           <h1 className="font-bold" style={{ fontSize: '24px' }}>
             Dashboard
           </h1>
@@ -214,7 +235,8 @@ export default function DashboardPage() {
                   placeholder="Filter by Category"
                   value={category}
                   onChange={(value) => setCategory(value)}
-                  className="w-full"
+                  className={`w-full ${isDarkMode ? 'custom-select' : "bg-white text-black"}`}
+                  popupClassName={'custom-dropdown'}
                   allowClear
                 >
                   {BOOK_CATEGORIES.map((cat) => (
@@ -226,7 +248,8 @@ export default function DashboardPage() {
                   placeholder="Filter by Status"
                   value={status}
                   onChange={(value) => setStatus(value)}
-                  className="w-full"
+                  className={`w-full ${isDarkMode ? 'custom-select' : "bg-white text-black"}`}
+                  popupClassName={'custom-dropdown'}
                   allowClear
                 >
                   {READ_STATUS.map((stat) => (
@@ -275,8 +298,11 @@ export default function DashboardPage() {
                 dataSource={books}
                 pagination={false}
                 rowKey="id"
-                className="w-full"
+                className={`w-full ${isDarkMode ? "custom-table" : "bg-white text-black"} rounded `}
                 scroll={{ x: 'max-content', y: 400 }}
+                rowClassName={(record, index) =>
+                  index % 2 === 0 ? "even-row" : "odd-row"
+                }
               />
               <Pagination
                 total={pagination.total}
@@ -285,22 +311,22 @@ export default function DashboardPage() {
                 showSizeChanger
                 onChange={handlePaginationChange}
                 onShowSizeChange={(current, size) => handlePaginationChange(current, size)}
-                className="mt-4 text-center flex justify-end"
+                className={`mt-4 text-center flex justify-end ${isDarkMode ? "custom-pagination custom-select" : "bg-white text-black"}`}
               />
             </>
           }
         </div>
-        <Modal
+        <ConfirmModal
+          isVisible={deleteModalVisible}
+          setIsVisible={setDeleteModalVisible}
+          onConfirm={() => handleDelete(Number(bookToDelete))}
           title="Confirm Delete"
-          open={deleteModalVisible}
-          onOk={() => handleDelete(Number(bookToDelete))}
-          onCancel={() => setDeleteModalVisible(false)}
-          okText="Delete"
+          message="Are you sure you want to delete this post?"
+          confirmText="Delete"
+          confirmDanger={true}
+          isDarkMode={isDarkMode}
           cancelText="Cancel"
-          okButtonProps={{ danger: true }}
-        >
-          <p>Are you sure you want to delete this post?</p>
-        </Modal>
+        />
       </Content>
     </Container>
   );

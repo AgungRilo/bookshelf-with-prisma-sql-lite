@@ -1,10 +1,14 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+/* @tailwind components;
+@tailwind utilities; */
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --antd-dropdown-background: black;
+  --antd-dropdown-text-color: white;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -18,4 +22,217 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* App.css */
+.custom-table .ant-table-thead>tr>th {
+  background-color: black;
+  /* Header berwarna hitam */
+  color: white;
+  /* Teks putih agar kontras */
+}
+
+.custom-table .ant-table-tbody>tr:nth-child(odd)>td {
+  background-color: #333333;
+  /* Row ganjil berwarna hitam muda */
+  color: white;
+}
+
+.custom-table .ant-table-tbody>tr:nth-child(even)>td {
+  background-color: #444444;
+  /* Row genap berwarna hitam lebih terang */
+  color: white;
+}
+
+.custom-table .ant-table-tbody>tr:hover>td {
+  background-color: #555555;
+  /* Row saat di-hover */
+  color: white;
+}
+
+.custom-table .ant-table-tbody > tr:hover > td {
+  background-color: #444444 !important; /* Warna gelap saat hover */
+  color: white !important;
+}
+
+/* Perbaiki warna teks di dalam row saat hover */
+.custom-table .ant-table-tbody > tr:hover td span {
+  color: white !important;
+}
+
+.custom-table .ant-table-tbody > tr:hover td .ant-btn {
+  color: white !important;
+}
+
+/* Pastikan teks dalam kategori dan status tetap memiliki warna asli saat hover */
+.custom-table .ant-table-tbody > tr:hover .category-badge,
+.custom-table .ant-table-tbody > tr:hover .status-badge {
+  color: inherit !important;
+  background-color: inherit !important;
+  border-color: inherit !important;
+}
+
+.custom-table .ant-table-tbody > tr:hover .ant-tag {
+  color: inherit !important;
+  background-color: inherit !important;
+  border-color: inherit !important;
+}
+
+/* select */
+/* Mengubah tampilan Select dalam mode gelap */
+.custom-select .ant-select-selector {
+  background-color: black !important;
+  color: white !important;
+  border: 1px solid white !important;
+}
+
+/* Placeholder text agar terlihat */
+.custom-select .ant-select-selection-placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.custom-select .ant-select-selection-item {
+  color: white !important;
+}
+
+/* Pastikan placeholder tetap terlihat dalam mode gelap */
+.custom-select .ant-select-selection-placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Styling dropdown menu */
+.custom-select .ant-select-dropdown {
+  background-color: black !important;
+  border: 1px solid white !important;
+}
+
+/* Styling untuk opsi di dalam dropdown */
+.custom-select .ant-select-item {
+  background-color: black !important;
+  color: white !important;
+}
+
+/* Styling saat opsi di-hover */
+.custom-select .ant-select-item-option-active {
+  background-color: #333333 !important;
+}
+
+/* Styling saat opsi dipilih */
+.custom-select .ant-select-item-option-selected {
+  background-color: #444444 !important;
+  color: white !important;
+}
+
+/* Untuk memperbaiki icon dropdown */
+.custom-select .ant-select-arrow {
+  color: white !important;
+}
+
+/* bata dropdown */
+/* Styling untuk dropdown agar background hitam */
+.custom-dropdown {
+  background-color: black !important;
+  border: 1px solid white !important;
+  z-index: 9999 !important; /* Pastikan lebih tinggi */
+  position: relative !important;
+}
+
+/* Styling teks dalam dropdown */
+.custom-dropdown .ant-select-item {
+  background-color: black !important;
+  color: white !important;
+  position: relative !important;
+  z-index: 10000 !important; 
+}
+
+/* Hover effect */
+.custom-dropdown .ant-select-item-option-active {
+  background-color: #333333 !important;
+  color: white !important;
+}
+
+/* Saat opsi dipilih */
+.custom-dropdown .ant-select-item-option-selected {
+  /* background-color: #444444 !important; */
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  position: relative !important;
+  z-index: 10001
+}
+
+/* disable select */
+/* Styling khusus untuk Select yang disabled */
+.custom-select.ant-select-disabled .ant-select-selector {
+  background-color: #3a3a3a !important; /* Abu-abu lebih jelas */
+  color: #b0b0b0 !important; /* Warna teks abu-abu lebih terang */
+  border: 1px solid #5a5a5a !important; /* Border abu-abu */
+  cursor: not-allowed !important;
+}
+
+/* Placeholder saat Select dalam keadaan disabled */
+.custom-select.ant-select-disabled .ant-select-selection-placeholder {
+  color: #8c8c8c !important; /* Placeholder lebih pudar */
+}
+
+/* Item yang dipilih tetap abu-abu */
+.custom-select.ant-select-disabled .ant-select-selection-item {
+  color: #b0b0b0 !important; /* Warna teks abu-abu */
+}
+
+/* Dropdown tetap hitam tetapi opsi lebih redup */
+.custom-dropdown.ant-select-dropdown-hidden {
+  background-color: #2b2b2b !important; /* Abu-abu lebih gelap */
+  border: 1px solid #444 !important;
+}
+
+/* Opsi dalam dropdown tetap terlihat tetapi lebih redup */
+.custom-dropdown.ant-select-dropdown-hidden .ant-select-item {
+  background-color: #2b2b2b !important;
+  color: #777777 !important;
+}
+
+/* Saat opsi di-hover dalam keadaan disabled (tidak ada efek) */
+.custom-dropdown.ant-select-dropdown-hidden .ant-select-item-option-active {
+  background-color: #2b2b2b !important;
+  color: #777777 !important;
+}
+
+/* Saat opsi dipilih dalam keadaan disabled */
+.custom-dropdown.ant-select-dropdown-hidden .ant-select-item-option-selected {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #888888 !important;
+}
+
+
+/* pagination */
+/* Ubah warna background pagination */
+.custom-pagination .ant-pagination-item {
+  background-color: black !important;
+  color: white !important;
+  border: 1px solid white !important;
+}
+
+/* Saat pagination di-hover */
+.custom-pagination .ant-pagination-item:hover {
+  background-color: #333 !important;
+  color: white !important;
+}
+
+/* Saat pagination aktif */
+.custom-pagination .ant-pagination-item-active {
+  background-color: #444 !important;
+  color: white !important;
+  border-color: white !important;
+}
+
+.custom-modal .ant-modal-content {
+  background-color: black !important;;
+}
+
+.custom-modal .ant-modal-title{
+  background-color: black !important;;
+}
+
+.custom-modal .ant-modal-close{
+  color:white !important;
 }

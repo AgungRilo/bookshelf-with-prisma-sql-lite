@@ -12,6 +12,8 @@ import { BookDetails } from "@/interface/interface";
 import { useRouter } from 'next/navigation';
 import { convertBytesToBase64, detectMimeType } from "@/app/utils/utils";
 import { BOOK_CATEGORIES, READ_STATUS } from "@/app/constant/constant";
+import { useTheme } from "@/context/ThemeContext";
+import DeleteModal from "@/app/components/modalDelete";
 
 export default function AddDashboardPage() {
     const { id } = useParams();
@@ -21,6 +23,8 @@ export default function AddDashboardPage() {
     const [coverImageBase64, setCoverImageBase64] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();
+    const { theme } = useTheme();
+    const isDarkMode = theme === "dark";
 
     useEffect(() => {
         if (id) {
@@ -77,18 +81,16 @@ export default function AddDashboardPage() {
 
     return (
         <Container>
-            <Modal
-                title="Confirm Delete"
-                open={deleteModalVisible}
-                onOk={() => handleDelete(Number(id))}
-                onCancel={() => setDeleteModalVisible(false)}
-                okText="Delete"
-                cancelText="Cancel"
-                okButtonProps={{ danger: true }}
-            >
-                <p>Are you sure you want to delete this post?</p>
-            </Modal>
+            <DeleteModal
+                deleteModalVisible={deleteModalVisible}
+                setDeleteModalVisible={setDeleteModalVisible}
+                handleDelete={handleDelete}
+                bookToDelete={data?.id}
+                isDarkMode={isDarkMode}
+                message="Are you sure you want to delete this post?" // Pesan yang dikirim dari luar
+            />
             <ReadingProgressModal
+                isDarkMode={isDarkMode}
                 open={readingModalVisible}
                 onClose={onClose}
                 createdAt={data?.createdAt ?? null}
@@ -96,7 +98,7 @@ export default function AddDashboardPage() {
                 endReadingAt={data?.endReadingAt ?? null}
             />
             <Content className="m-4">
-                <div className="p-4 bg-white rounded-md shadow-sm">
+                <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "} rounded-md shadow-sm `}>
                     <div className="flex justify-between">
                         <h1 className="font-bold" style={{ fontSize: '24px' }}>
                             Detail Book
@@ -112,7 +114,7 @@ export default function AddDashboardPage() {
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Kolom 1 (Text Information) */}
                         <div>
-                            <h2 className="font-bold">Title</h2>
+                            <h2 className="font-bold" >Title</h2>
                             <h2>{data?.title || "-"}</h2>
 
                             <h2 className="font-bold mt-4">Author</h2>
@@ -144,6 +146,6 @@ export default function AddDashboardPage() {
                     </div>
                 </div>
             </Content>
-        </Container>
+        </Container >
     )
 }
