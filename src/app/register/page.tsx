@@ -17,7 +17,6 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, router]);
 
-
   const onFinish = async (values: RegisterFormValues) => {
     setLoading(true);
     try {
