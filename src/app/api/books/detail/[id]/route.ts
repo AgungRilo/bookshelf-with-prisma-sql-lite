@@ -39,7 +39,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         { status: 404 }
       );
     }
-    
 
     return NextResponse.json(book, { status: 200 });
   } catch (error) {
