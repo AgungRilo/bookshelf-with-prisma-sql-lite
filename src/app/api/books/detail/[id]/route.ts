@@ -40,7 +40,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       );
     }
 
-    // Berikan respon sukses
     return NextResponse.json(book, { status: 200 });
   } catch (error) {
     return NextResponse.json(
