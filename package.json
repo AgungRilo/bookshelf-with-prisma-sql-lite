@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma db push && prisma generate"
+    
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
