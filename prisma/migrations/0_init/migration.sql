@@ -17,6 +17,7 @@ CREATE TABLE "Book" (
     "isbn" TEXT NOT NULL,
     "coverImage" BLOB NOT NULL,
     "note" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "startReadingAt" DATETIME,
     "endReadingAt" DATETIME,
     "userId" INTEGER NOT NULL,
@@ -28,3 +29,7 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Book_isbn_key" ON "Book"("isbn");
+
