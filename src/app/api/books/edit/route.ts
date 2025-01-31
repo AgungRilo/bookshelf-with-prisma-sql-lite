@@ -6,19 +6,22 @@ const prisma = new PrismaClient();
 export async function PUT(req: Request) {
   try {
     const formData = await req.formData();
-
-    const id = formData.get("id");
-    const title = formData.get("title");
-    const author = formData.get("author");
-    const category = formData.get("category");
-    const status = formData.get("status");
-    const isbn = formData.get("isbn");
-    const userId = formData.get("userId");
-    const note = formData.get("note") || "";
+    const getString = (key: string) => {
+      const value = formData.get(key);
+      return typeof value === "string" ? value.trim() : null;
+    };
+    const id = getString("id");
+    const title = getString("title");
+    const author = getString("author");
+    const category = getString("category");
+    const status = getString("status");
+    const isbn = getString("isbn");
+    const userId = getString("userId");
+    const note = getString("note") || "";
 
     // Pastikan `startReadingAt` dan `endReadingAt` bertipe string sebelum dikonversi ke Date
-    const startReadingAtValue = formData.get("startReadingAt");
-    const endReadingAtValue = formData.get("endReadingAt");
+    const startReadingAtValue = getString("startReadingAt");
+    const endReadingAtValue = getString("endReadingAt");
 
     const startReadingAt = (typeof startReadingAtValue === "string" && startReadingAtValue.trim() !== "")
         ? new Date(startReadingAtValue)
@@ -31,19 +34,19 @@ export async function PUT(req: Request) {
     const coverImage = formData.get("coverImage");
 
     // **Validasi input**: Semua field wajib kecuali `note`
-    if (!id || !title || !author || !category || !status || !isbn || !userId) {
-      return NextResponse.json(
-        { error: "All fields except note are required." },
-        { status: 400 }
-      );
-    }
+    
 
     // **Cek dan konversi `coverImage` jika ada perubahan**
     let coverImageBuffer: Buffer | undefined = undefined;
     if (coverImage instanceof Blob) {
       coverImageBuffer = Buffer.from(await coverImage.arrayBuffer());
     }
-
+    if (!id || !title || !author || !category || !status || !isbn || !userId) {
+      return NextResponse.json(
+        { error: "All fields except note are required." },
+        { status: 400 }
+      );
+    }
     // **Update Buku** (Gunakan `set` hanya jika `coverImage` ada)
     const updatedBook = await prisma.book.update({
       where: { id: id.toString() },

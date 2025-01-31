@@ -7,14 +7,18 @@ export async function POST(req: Request) {
   try {
     // Pastikan request menggunakan multipart/form-data
     const formData = await req.formData();
+    const getString = (key: string) => {
+      const value = formData.get(key);
+      return typeof value === "string" ? value.trim() : null;
+    };
 
-    const title = formData.get("title");
-    const author = formData.get("author");
-    const category = formData.get("category");
-    const status = formData.get("status");
-    const isbn = formData.get("isbn");
-    const userId = formData.get("userId");
-    const note = formData.get("note") || "";
+    const title = getString("title");
+    const author = getString("author");
+    const category = getString("category");
+    const status = getString("status");
+    const isbn = getString("isbn");
+    const userId = getString("userId");
+    const note = getString("note") || "";
 
     const coverImage = formData.get("coverImage");
 
