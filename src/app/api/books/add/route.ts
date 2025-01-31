@@ -23,11 +23,10 @@ export async function POST(req: Request) {
     const coverImage = formData.get("coverImage");
 
 
+    let coverImageBuffer: Buffer | null = null;
 
-    // Konversi file coverImage ke Buffer
-    let coverImageBuffer: Uint8Array | undefined = undefined;
     if (coverImage instanceof Blob) {
-      coverImageBuffer = new Uint8Array(await coverImage.arrayBuffer());
+      coverImageBuffer = Buffer.from(await coverImage.arrayBuffer()); // Menggunakan Buffer
     }
     // Validasi input
     if (!title || !author || !category || !status || !isbn || !userId || !coverImage) {
