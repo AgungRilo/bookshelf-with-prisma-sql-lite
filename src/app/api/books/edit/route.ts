@@ -44,14 +44,14 @@ export async function PUT(req: Request) {
 
     // **Update Buku** (Gunakan `set` untuk coverImage)
     const updatedBook = await prisma.book.update({
-      where: { id: parseInt(id, 10) },
+      where: { id: id },
       data: {
         title,
         author,
         category,
         status,
         isbn,
-        userId: parseInt(userId, 10),
+        userId: userId,
         startReadingAt: startReadingAt ? new Date(startReadingAt) : null,
         endReadingAt: endReadingAt ? new Date(endReadingAt) : null,
         ...(note !== undefined && { note }), // Update `note` hanya jika dikirim

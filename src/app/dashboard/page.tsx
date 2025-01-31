@@ -27,7 +27,7 @@ export default function DashboardPage() {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
-  const [bookToDelete, setBookToDelete] = useState<number | null>(null);
+  const [bookToDelete, setBookToDelete] = useState<string>("");
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const [pagination, setPagination] = useState({
@@ -45,7 +45,7 @@ export default function DashboardPage() {
   const { Option } = Select
   const { Content } = Layout;
 
-  const fetchBooks = async (userId: number, page: number, limit: number, search: string, category?: string, status?: string) => {
+  const fetchBooks = async (userId: string , page: number, limit: number, search: string, category?: string, status?: string) => {
     const controller = new AbortController();
     try {
       setLoadingTable(true);
@@ -67,7 +67,7 @@ export default function DashboardPage() {
     } finally {
       setLoadingTable(false);
     }
-    return () => controller.abort(); 
+    return () => controller.abort();
   };
 
   const fetchStats = async () => {
@@ -104,7 +104,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (userId) {
-      fetchBooks(Number(userId), page, pageSize, debouncedSearch, category, status);
+      fetchBooks(userId, page, pageSize, debouncedSearch, category, status);
     }
   }, [userId, page, pageSize, debouncedSearch, category, status]); // Pastikan `category` & `status` dipantau
 
@@ -126,22 +126,26 @@ export default function DashboardPage() {
     router.push('/dashboard/add');
   };
 
-  const handleEdit = (bookId: number) => {
+  const handleEdit = (bookId: string) => {
     router.push(`/dashboard/edit/${bookId}`);
   };
 
-  const handleDelete = async (bookId: number) => {
+  const handleDelete = async (bookId: string) => {
     setDeleteModalVisible(false);
     try {
       await axios.delete(`/api/books/delete?id=${bookId}`);
       message.success('Book deleted successfully');
-      fetchBooks(Number(userId), page, pageSize, search);
+      // fetchBooks(userId, page, pageSize, search);
+      if (userId) {
+        fetchBooks(userId, page, pageSize, debouncedSearch, category, status);
+        fetchStats();
+      }
     } catch (error) {
       message.error('Failed to delete book');
     }
   };
 
-  const goToDetail = (id: number) => {
+  const goToDetail = (id: string) => {
     router.push(`/dashboard/detail/${id}`);
   };
 
@@ -319,7 +323,7 @@ export default function DashboardPage() {
         <ConfirmModal
           isVisible={deleteModalVisible}
           setIsVisible={setDeleteModalVisible}
-          onConfirm={() => handleDelete(Number(bookToDelete))}
+          onConfirm={() => handleDelete(bookToDelete)}
           title="Confirm Delete"
           message="Are you sure you want to delete this post?"
           confirmText="Delete"

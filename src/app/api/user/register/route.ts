@@ -23,7 +23,6 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ message: 'User registered successfully', user });
   } catch (error) {
-    console.error("Error in login API:", error);
     return NextResponse.json({ error: 'User already exists' }, { status: 409 });
   }
 }

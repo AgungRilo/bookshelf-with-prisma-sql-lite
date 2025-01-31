@@ -7,7 +7,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   try {
     const { id } = params;
 
-    if (!id || isNaN(Number(id))) {
+    if (!id ) {
       return NextResponse.json(
         { error: 'Valid Book ID is required' },
         { status: 400 }
@@ -16,7 +16,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     const book = await prisma.book.findUnique({
       where: {
-        id: parseInt(id, 10),
+        id:id,
       },
       select: {
         id: true,

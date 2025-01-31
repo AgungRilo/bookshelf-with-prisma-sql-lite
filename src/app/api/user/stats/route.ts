@@ -10,30 +10,30 @@ export async function GET(req: Request) {
     const userId = searchParams.get("userId");
 
     // Validasi userId harus ada & berupa angka
-    if (!userId || isNaN(Number(userId))) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Valid userId is required" },
         { status: 400 }
       );
     }
 
-    const userIdNumber = parseInt(userId, 10);
+    userId;
 
     // Query count hanya untuk user yang sedang login
     const totalBooks = await prisma.book.count({
-      where: { userId: userIdNumber },
+      where: { userId: userId },
     });
 
     const readingBooks = await prisma.book.count({
       where: {
-        userId: userIdNumber,
+        userId: userId,
         status: "reading",
       },
     });
 
     const completedBooks = await prisma.book.count({
       where: {
-        userId: userIdNumber,
+        userId: userId,
         status: "completed",
       },
     });

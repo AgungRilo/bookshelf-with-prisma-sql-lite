@@ -9,7 +9,7 @@ export async function GET(req: Request) {
       new URL(req.url).searchParams.entries()
     );
 
-    if (!userId || isNaN(Number(userId))) {
+    if (!userId) {
       return NextResponse.json(
         { error: 'Valid User ID is required' },
         { status: 400 }
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
     const offset = (currentPage - 1) * pageSize;
 
     const whereClause: any = {
-      userId: parseInt(userId, 10),
+      userId: userId,
     };
 
     // **Filter berdasarkan search (title & author)**
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       skip: offset,
       take: pageSize,
       orderBy: {
-        id: 'desc',
+        createdAt: 'desc',
       },
       select: {
         id: true,

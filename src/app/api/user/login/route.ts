@@ -61,7 +61,6 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error("Error in login API:", error);
     return NextResponse.json(
       { error: 'Something went wrong' },
       { status: 500 }

@@ -27,12 +27,12 @@ export default function AddDashboardPage() {
     const isDarkMode = theme === "dark";
 
     useEffect(() => {
-        if (id) {
-            fetchBookDetails(Number(id));
+        if (id && typeof id === 'string') {
+            fetchBookDetails(id);
         }
     }, [id]);
 
-    const fetchBookDetails = async (id: number) => {
+    const fetchBookDetails = async (id: string) => {
         try {
             const response = await axios.get(`/api/books/detail/${id}`);
             setData(response.data);
@@ -53,7 +53,7 @@ export default function AddDashboardPage() {
             setLoading(false);
         }
     };
-    const handleDelete = async (bookId: number) => {
+    const handleDelete = async (bookId: string) => {
         setDeleteModalVisible(false);
         try {
             await axios.delete(`/api/books/delete?id=${bookId}`);

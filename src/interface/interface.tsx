@@ -20,7 +20,7 @@ export interface BooksFormValues {
 }
 
 export interface BookDetails {
-    id: number;
+    id: string;
     title: string;
     author: string;
     category: string;

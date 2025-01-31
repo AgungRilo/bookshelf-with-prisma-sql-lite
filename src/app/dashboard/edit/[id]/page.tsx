@@ -32,7 +32,7 @@ export default function EditDashboardPage() {
     const router = useRouter();
     const { theme } = useTheme();
     const isDarkMode = theme === 'dark';
-    const userId = Number(useAppSelector((state) => state.auth.user?.id));
+    const userId = useAppSelector((state) => state.auth.user?.id);
     const handleCancel = () => {
         if (isFormTouched) {
             setIsModalVisibleConfirm(true);
@@ -41,11 +41,11 @@ export default function EditDashboardPage() {
         }
     }
     useEffect(() => {
-        if (id) {
-            fetchBookDetails(Number(id));
+        if (id && typeof id === 'string') {
+            fetchBookDetails(id);
         }
     }, [id]);
-    const fetchBookDetails = async (id: number) => {
+    const fetchBookDetails = async (id: string) => {
         try {
             const response = await axios.get(`/api/books/detail/${id}`);
             const data = response.data
@@ -119,8 +119,8 @@ export default function EditDashboardPage() {
             // **Siapkan payload**
             const gmt7Date = new Date(Date.now()); // Waktu GMT+7
             const payload = {
-                id: Number(id),
-                userId: Number(userId), // Pastikan userId dikirim sebagai integer
+                id: id,
+                userId: userId, // Pastikan userId dikirim sebagai integer
                 title: values.title,
                 author: values.author,
                 category: values.category,

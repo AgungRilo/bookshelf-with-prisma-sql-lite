@@ -20,7 +20,7 @@ export async function DELETE(req: Request) {
     // Hapus buku berdasarkan ID
     const deletedBook = await prisma.book.delete({
       where: {
-        id: parseInt(id, 10), // Pastikan id diubah ke angka
+        id: id, // Pastikan id diubah ke angka
       },
     });
 

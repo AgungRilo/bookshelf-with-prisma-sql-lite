@@ -4,17 +4,18 @@ import { Modal, ModalProps } from "antd";
 interface DeleteModalProps extends ModalProps {
   deleteModalVisible: boolean;
   setDeleteModalVisible: (visible: boolean) => void;
-  handleDelete: (id: number) => void;
-  bookToDelete?: number | null;
+  handleDelete: (id: string) => void;
+  bookToDelete?: string;
   isDarkMode?: boolean;
   message?: string; 
 }
+
 
 const DeleteModal: React.FC<DeleteModalProps> = ({
   deleteModalVisible,
   setDeleteModalVisible,
   handleDelete,
-  bookToDelete,
+  bookToDelete="",
   isDarkMode = false,
   message = "Are you sure you want to delete this post?", // Default pesan
   ...modalProps
@@ -24,7 +25,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
       title="Confirm Delete"
       className={isDarkMode ? "custom-modal" : ""}
       open={deleteModalVisible}
-      onOk={() => handleDelete(Number(bookToDelete))}
+      onOk={() => handleDelete(bookToDelete)}
       onCancel={() => setDeleteModalVisible(false)}
       okText="Delete"
       cancelText="Cancel"
