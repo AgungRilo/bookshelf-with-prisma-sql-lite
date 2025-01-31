@@ -19,8 +19,8 @@ export async function PUT(req: Request) {
     const author = getString("author");
     const category = getString("category");
     const status = getString("status");
-    const isbn = getString("isbn");
-    const userId = getString("userId");
+    const isbn = getString("isbn") ?? undefined;
+    const userId = getString("userId") ?? undefined;
     const note = getString("note") || "";
 
     // Pastikan `startReadingAt` dan `endReadingAt` bertipe string sebelum dikonversi ke Date
@@ -31,8 +31,11 @@ export async function PUT(req: Request) {
 
     // **Validasi input**: Semua field wajib kecuali `note`
     
-    const existingBook = await prisma.book.findUnique({
-      where: { isbn, userId },
+    const existingBook = await prisma.book.findFirst({
+      where: {
+        isbn,
+        userId,
+      },
     });
 
     if (existingBook) {

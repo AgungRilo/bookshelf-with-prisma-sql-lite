@@ -120,6 +120,9 @@ export default function AddDashboardPage() {
                             <h2 className="font-bold mt-4">Author</h2>
                             <h2>{data?.author || "-"}</h2>
 
+                            <h2 className="font-bold mt-4">ISBN</h2>
+                            <h2>{data?.isbn || "-"}</h2>
+
                             <h2 className="font-bold mt-4">Category</h2>
                             <h2>{data?.category ? <Tag color="blue">{categoryLabel}</Tag> : "-"}</h2>
 

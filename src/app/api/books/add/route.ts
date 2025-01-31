@@ -18,11 +18,10 @@ export async function POST(req: Request) {
     const author = getString("author");
     const category = getString("category");
     const status = getString("status");
-    const isbn = getString("isbn");
-    const userIdValue = getString("userId");
+    const isbn = getString("isbn") ?? undefined;
+    const userId = getString("userId") ?? undefined;
     const note = getString("note") || "";
 
-    const userId = userIdValue;
 
     // Validasi input
     if (!title || !author || !category || !status || !isbn || !userId) {
@@ -31,8 +30,11 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    const existingBook = await prisma.book.findUnique({
-      where: { isbn, userId },
+    const existingBook = await prisma.book.findFirst({
+      where: {
+        isbn,
+        userId,
+      },
     });
 
     if (existingBook) {
