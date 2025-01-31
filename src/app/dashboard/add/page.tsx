@@ -109,7 +109,7 @@ export default function AddDashboardPage() {
                 setIsVisible={setIsModalVisible}
                 onConfirm={handleOk}
                 title="Success"
-                message="The book has been successfully edited!"
+                message="The book has been successfully added!"
                 confirmText="OK"
                 isDarkMode={isDarkMode}
                 closable={false} // Tidak bisa ditutup tanpa tombol
