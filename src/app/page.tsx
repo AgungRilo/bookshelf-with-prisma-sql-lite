@@ -86,7 +86,7 @@ export default function LoginPage() {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
+            <Button type="primary" htmlType="submit" disabled={loading} loading={loading} block>
               Login
             </Button>
           </Form.Item>

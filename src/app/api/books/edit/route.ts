@@ -31,7 +31,16 @@ export async function PUT(req: Request) {
 
     // **Validasi input**: Semua field wajib kecuali `note`
     
+    const existingBook = await prisma.book.findUnique({
+      where: { isbn, userId },
+    });
 
+    if (existingBook) {
+      return NextResponse.json(
+        { error: "A book with this ISBN already exists." },
+        { status: 409 } // 409 Conflict (ISBN sudah ada)
+      );
+    }
     // **Cek dan konversi `coverImage` jika ada perubahan**
     let coverImageBuffer: Buffer | undefined = undefined;
     if (coverImage instanceof Blob) {

@@ -31,7 +31,16 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const existingBook = await prisma.book.findUnique({
+      where: { isbn, userId },
+    });
 
+    if (existingBook) {
+      return NextResponse.json(
+        { error: "A book with this ISBN already exists." },
+        { status: 409 } // 409 Conflict (ISBN sudah ada)
+      );
+    }
     // Ambil file coverImage jika ada
     const coverImage = formData.get("coverImage");
     let coverImageBuffer: Uint8Array = new Uint8Array(0); // Default ke array kosong

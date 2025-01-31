@@ -36,6 +36,7 @@ const ReadingProgressModal: React.FC<ReadingProgressModalProps> = ({
                 footer={null}
             >
                 <Timeline
+                className={`${isDarkMode && "custom-progress" }`}
                     items={[
                         {
                             color: "green",

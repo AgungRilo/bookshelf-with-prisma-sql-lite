@@ -236,3 +236,7 @@ body {
 .custom-modal .ant-modal-close{
   color:white !important;
 }
+
+.custom-progress .ant-timeline-item-tail {
+  background-color: white !important;
+}

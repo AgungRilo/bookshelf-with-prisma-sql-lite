@@ -105,7 +105,7 @@ export default function EditDashboardPage() {
         try {
             setIsSubmitting(true);
             const formData = new FormData();
-    
+
             formData.append("id", id.toString()); // Pastikan `id` dikirim sebagai string
             formData.append("userId", userId?.toString() || "");
             formData.append("title", values.title || "");
@@ -114,12 +114,12 @@ export default function EditDashboardPage() {
             formData.append("status", values.status || "");
             formData.append("isbn", values.isbn || "");
             formData.append("note", values.note || "");
-    
+
             // Jika user mengunggah gambar baru, gunakan file tersebut
             if (values.coverImage?.[0]?.originFileObj) {
                 formData.append("coverImage", values.coverImage[0].originFileObj);
             }
-    
+
             // Tambahkan waktu membaca jika status berubah
             const gmt7Date = new Date(Date.now());
             if (values.status === "reading") {
@@ -127,13 +127,13 @@ export default function EditDashboardPage() {
             } else if (values.status === "completed") {
                 formData.append("endReadingAt", gmt7Date.toISOString());
             }
-    
+
             const response = await axios.put("/api/books/edit", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-    
+
             if (response.status === 200) {
                 message.success("Book updated successfully!");
                 setIsModalVisible(true);
@@ -144,7 +144,7 @@ export default function EditDashboardPage() {
             setIsSubmitting(false);
         }
     };
-    
+
     const handleModalCancel = () => {
         setIsModalVisibleConfirm(false);
     };
@@ -193,7 +193,7 @@ export default function EditDashboardPage() {
                 isDarkMode={isDarkMode}
                 closable={false} // Tidak bisa ditutup tanpa tombol
             />
-           
+
             <ReadingProgressModal
                 isDarkMode={isDarkMode}
                 open={readingModalVisible}
@@ -202,9 +202,9 @@ export default function EditDashboardPage() {
                 startReadingAt={dataBook?.startReadingAt ?? null}
                 endReadingAt={dataBook?.endReadingAt ?? null}
             />
-            <div style={{ height: '90vh' }}>
-                <Content className="m-4 overflow-y-auto max-h-[calc(90vh-64px)] p-5 bg-white" >
-                    <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "} rounded-md shadow-sm `}>
+            <div className={`${isDarkMode && "bg-[#3A4750]"} h-[90vh] px-8`} >
+                <Content className={`m-4 overflow-y-auto max-h-[calc(90vh-64px)] rounded-md p-5 ${isDarkMode ? "bg-black" : "bg-white "} `}>
+                    <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "}  shadow-sm `}>
                         <h1 className="font-bold" style={{ fontSize: '24px' }}>
                             Edit Book
                         </h1>
@@ -220,8 +220,8 @@ export default function EditDashboardPage() {
                                 label="Title"
                                 name="title"
                                 rules={[
-                                    { required: true, message: 'Title is required!' },
-                                    { max: 100, message: 'Title must be less than 100 characters!' },
+                                    { required: true, message: "Title is required!" },
+                                    { max: 100, message: "Title must be less than 100 characters!" },
                                 ]}
                             >
                                 <Input placeholder="Please enter book title" />
@@ -302,7 +302,7 @@ export default function EditDashboardPage() {
                                 name="status"
                                 rules={[{ required: true, message: "Please select a read status!" }]}
                             >
-                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={`${isDarkMode ? 'custom-dropdown' : ""}`}  disabled={dataBook?.status === 'completed'} placeholder="Select a read status">
+                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={`${isDarkMode ? 'custom-dropdown' : ""}`} disabled={dataBook?.status === 'completed'} placeholder="Select a read status">
                                     {readStatus?.map((status: any) => (
                                         <Option key={status.value} value={status.value}>
                                             {status.label}
@@ -313,7 +313,10 @@ export default function EditDashboardPage() {
                             <Form.Item
                                 label="Note"
                                 name="note"
-                                rules={[{ required: false, message: "" }]}
+                                rules={[
+                                    { required: false },
+                                    { max: 500, message: "Note must be less than 500 characters!" },
+                                ]}
                             >
                                 <Input.TextArea placeholder="Please enter book note" />
                             </Form.Item>

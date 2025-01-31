@@ -58,25 +58,25 @@ export default function AddDashboardPage() {
         try {
             setIsSubmitting(true);
             const formData = new FormData();
-    
-           formData.append("userId", data?.toString() || "");
+
+            formData.append("userId", data?.toString() || "");
             formData.append("title", values.title);
             formData.append("author", values.author);
             formData.append("category", values.category);
             formData.append("status", values.status);
             formData.append("isbn", values.isbn);
             formData.append("note", values.note || "");
-    
+
             if (values.coverImage?.[0]?.originFileObj) {
                 formData.append("coverImage", values.coverImage[0].originFileObj);
             }
-    
+
             const response = await axios.post("/api/books/add", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-    
+
             if (response.status === 201) {
                 message.success("Book created successfully!");
                 setIsModalVisible(true);
@@ -87,7 +87,7 @@ export default function AddDashboardPage() {
             setIsSubmitting(false);
         }
     };
-    
+
 
     return (
         <Container>
@@ -114,9 +114,10 @@ export default function AddDashboardPage() {
                 isDarkMode={isDarkMode}
                 closable={false} // Tidak bisa ditutup tanpa tombol
             />
-            <div style={{ height: '90vh' }}>
-                <Content className="m-4 overflow-y-auto max-h-[calc(90vh-64px)] p-5 bg-white">
-                    <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "} rounded-md shadow-sm `}>
+            <div className={`${isDarkMode && "bg-[#3A4750]"} h-[90vh] px-8`} >
+
+                <Content className={`m-4 overflow-y-auto max-h-[calc(90vh-64px)] rounded-md p-5 ${isDarkMode ? "bg-black" : "bg-white "} `}>
+                    <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "}  shadow-sm `}>
                         <h1 className="font-bold" style={{ fontSize: '24px' }}>
                             Add Book
                         </h1>
@@ -133,8 +134,8 @@ export default function AddDashboardPage() {
                                 label="Title"
                                 name="title"
                                 rules={[
-                                    { required: true, message: 'Title is required!' },
-                                    { max: 100, message: 'Title must be less than 100 characters!' },
+                                    { required: true, message: "Title is required!" },
+                                    { max: 100, message: "Title must be less than 100 characters!" },
                                 ]}
                             >
                                 <Input placeholder="Please enter book title" />
@@ -143,8 +144,8 @@ export default function AddDashboardPage() {
                                 label="Author"
                                 name="author"
                                 rules={[
-                                    { required: true, message: 'Title is required!' },
-                                    { max: 100, message: 'Title must be less than 100 characters!' },
+                                    { required: true, message: "Author is required!" },
+                                    { max: 100, message: "Author must be less than 100 characters!" },
                                 ]}
                             >
                                 <Input placeholder="Please enter book author" />
@@ -153,9 +154,9 @@ export default function AddDashboardPage() {
                                 label="ISBN"
                                 name="isbn"
                                 rules={[
-                                    { required: true, message: 'ISBN is required!' },
+                                    { required: true, message: "ISBN is required!" },
                                     {
-                                        pattern: /^(?:\d{9}X|\d{10}|\d{13})$/,
+                                        pattern: /^(97(8|9))?\d{9}(\d|X)$/,
                                         message: "Invalid ISBN! Must be ISBN-10 or ISBN-13 format.",
                                     },
                                 ]}
@@ -169,10 +170,7 @@ export default function AddDashboardPage() {
                                 valuePropName="fileList"
                                 getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
                                 rules={[
-                                    {
-                                        required: true,
-                                        message: "Please upload a cover image!",
-                                    },
+                                    { required: true, message: "Please upload a cover image!" },
                                 ]}
                             >
                                 <Upload
@@ -226,7 +224,10 @@ export default function AddDashboardPage() {
                             <Form.Item
                                 label="Note"
                                 name="note"
-                                rules={[{ required: false, message: "" }]}
+                                rules={[
+                                    { required: false },
+                                    { max: 500, message: "Note must be less than 500 characters!" },
+                                ]}
                             >
                                 <Input.TextArea placeholder="Please enter book note" />
                             </Form.Item>

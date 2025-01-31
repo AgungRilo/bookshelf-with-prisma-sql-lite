@@ -36,7 +36,7 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
-  
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -52,35 +52,44 @@ export default function RegisterPage() {
           <Form.Item
             label="Username"
             name="username"
-            rules={[{ required: true, message: 'Please input your username!' }]}
+            rules={[
+              { required: true, message: 'Username is required!' },
+              { min: 3, message: 'Username must be at least 3 characters!' },
+              { max: 20, message: 'Username cannot exceed 20 characters!' },
+              { pattern: /^[a-zA-Z0-9_]+$/, message: 'Only letters, numbers, and underscores are allowed!' },
+            ]}
           >
-            <Input placeholder="Enter your username" />
+            <Input disabled={loading} placeholder="Enter your username" />
           </Form.Item>
 
           <Form.Item
             label="Email"
             name="email"
             rules={[
-              { required: true, message: 'Please input your email!' },
-              { type: 'email', message: 'Please enter a valid email!' },
+              { required: true, message: 'Email is required!' },
+              { type: 'email', message: 'Please enter a valid email address!' },
             ]}
           >
-            <Input placeholder="Enter your email" />
+            <Input disabled={loading} placeholder="Enter your email" />
           </Form.Item>
 
           <Form.Item
             label="Password"
             name="password"
             rules={[
-              { required: true, message: 'Please input your password!' },
-              { min: 6, message: 'Password must be at least 6 characters!' },
+              { required: true, message: 'Password is required!' },
+              { min: 8, message: 'Password must be at least 8 characters!' },
+              { max: 50, message: 'Password cannot exceed 50 characters!' },
+              { pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, 
+                message: 'Password must include uppercase, lowercase, number, and special character!' 
+              },
             ]}
           >
-            <Input.Password placeholder="Enter your password" />
+            <Input.Password disabled={loading} placeholder="Enter your password" />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} block>
+            <Button type="primary" htmlType="submit" disabled={loading} loading={loading} block>
               Register
             </Button>
           </Form.Item>
