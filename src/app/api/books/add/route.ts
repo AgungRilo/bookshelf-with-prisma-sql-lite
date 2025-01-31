@@ -25,9 +25,9 @@ export async function POST(req: Request) {
 
 
     // Konversi file coverImage ke Buffer
-    let coverImageBuffer: Buffer | undefined = undefined;
+    let coverImageBuffer: Uint8Array | undefined = undefined;
     if (coverImage instanceof Blob) {
-      coverImageBuffer = Buffer.from(await coverImage.arrayBuffer());
+      coverImageBuffer = new Uint8Array(await coverImage.arrayBuffer());
     }
     // Validasi input
     if (!title || !author || !category || !status || !isbn || !userId || !coverImage) {
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
         category,
         status,
         isbn,
-        ...(coverImageBuffer !== undefined && { coverImage: coverImageBuffer }),
+        ...(coverImageBuffer && { coverImage: coverImageBuffer }),
         note,
         userId, // Pastikan userId dalam format integer
       },
