@@ -21,7 +21,7 @@ export default function AddDashboardPage() {
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [isFormTouched, setIsFormTouched] = useState<boolean>(false);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-    const data = useAppSelector((state) => state.auth.user);
+    const data = useAppSelector((state) => state.auth.user?.id);
     const router = useRouter();
     const { Option } = Select;
     const { theme } = useTheme();
@@ -55,51 +55,39 @@ export default function AddDashboardPage() {
     };
 
     const handleFinish = async (values: BooksFormValues) => {
-        setIsSubmitting(true);
         try {
-            // Ambil file dari `originFileObj`
-            const coverImageFile = values.coverImage[0]?.originFileObj;
-            if (!coverImageFile) {
-                message.error("Cover image file is missing or invalid.");
-                return;
+            setIsSubmitting(true);
+            const formData = new FormData();
+    
+            formData.append("userId", data?.toString() || "");
+            formData.append("title", values.title);
+            formData.append("author", values.author);
+            formData.append("category", values.category);
+            formData.append("status", values.status);
+            formData.append("isbn", values.isbn);
+            formData.append("note", values.note || "");
+    
+            if (values.coverImage?.[0]?.originFileObj) {
+                formData.append("coverImage", values.coverImage[0].originFileObj);
             }
-
-            // Konversi coverImage ke Uint8Array
-            const coverImageBytes = await convertFileToArrayBuffer(coverImageFile);
-            // Siapkan payload untuk dikirim ke backend
-            const payload = {
-                userId: data?.id, // Pastikan `data` berasal dari context atau Redux
-                title: values.title,
-                author: values.author,
-                category: values.category,
-                status: values.status,
-                isbn: values.isbn,
-                coverImage: Array.from(coverImageBytes), // Ubah Uint8Array ke Array biasa
-                note: values.note || "", // Catatan opsional
-            };
-
-            // Kirim data ke backend
-            const response = await axios.post("/api/books/add", payload, {
+    
+            const response = await axios.post("/api/books/add", formData, {
                 headers: {
-                    "Content-Type": "application/json",
+                    "Content-Type": "multipart/form-data",
                 },
             });
-
-            // Jika berhasil
+    
             if (response.status === 201) {
                 message.success("Book created successfully!");
-                setIsModalVisible(true); // Tampilkan modal atau redirect
-                setIsSubmitting(false);
-
+                setIsModalVisible(true);
             }
         } catch (error: any) {
+            message.error(error.response?.data?.error || "Failed to create book. Please try again.");
+        } finally {
             setIsSubmitting(false);
-
-            message.error(
-                error.response?.data?.error || "Failed to create book. Please try again."
-            );
         }
     };
+    
 
     return (
         <Container>
@@ -116,19 +104,6 @@ export default function AddDashboardPage() {
                 onCancel={handleModalCancel}
                 closable={false} // Tidak bisa ditutup tanpa tombol
             />
-            <Modal
-                title="Success"
-                open={isModalVisible}
-                onOk={handleOk}
-                closable={false}
-                footer={[
-                    <Button key="ok" type="primary" onClick={handleOk}>
-                        OK
-                    </Button>,
-                ]}
-            >
-                <p>The book has been successfully added!</p>
-            </Modal>
             <ModalSuccess
                 isVisible={isModalVisible}
                 setIsVisible={setIsModalVisible}

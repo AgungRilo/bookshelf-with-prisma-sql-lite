@@ -104,53 +104,47 @@ export default function EditDashboardPage() {
     const handleFinish = async (values: BooksFormValues) => {
         try {
             setIsSubmitting(true);
-            let coverImageBytes;
-
-            // **Cek apakah user mengunggah gambar baru**
-            const coverImageFile = values.coverImage?.[0]?.originFileObj;
-
-            if (coverImageFile) {
-                // Jika ada file baru, konversi ke Uint8Array
-                coverImageBytes = await convertFileToArrayBuffer(coverImageFile);
-            } else if (dataBook?.coverImage) {
-                // Jika tidak ada file baru, gunakan coverImage dari database
-                coverImageBytes = dataBook.coverImage;
+            const formData = new FormData();
+    
+            formData.append("id", id.toString()); // Pastikan `id` dikirim sebagai string
+            formData.append("userId", userId?.toString() || "");
+            formData.append("title", values.title || "");
+            formData.append("author", values.author || "");
+            formData.append("category", values.category || "");
+            formData.append("status", values.status || "");
+            formData.append("isbn", values.isbn || "");
+            formData.append("note", values.note || "");
+    
+            // Jika user mengunggah gambar baru, gunakan file tersebut
+            if (values.coverImage?.[0]?.originFileObj) {
+                formData.append("coverImage", values.coverImage[0].originFileObj);
             }
-
-            // **Siapkan payload**
-            const gmt7Date = new Date(Date.now()); // Waktu GMT+7
-            const payload = {
-                id: id,
-                userId: userId, // Pastikan userId dikirim sebagai integer
-                title: values.title,
-                author: values.author,
-                category: values.category,
-                status: values.status,
-                isbn: values.isbn,
-                coverImage: coverImageBytes instanceof Uint8Array
-                    ? Array.from(coverImageBytes)
-                    : coverImageBytes, // Kirim hanya jika ada gambar
-                note: values.note || "", // Note tetap dikirim meskipun kosong
-                startReadingAt: values.status === "reading" ? gmt7Date : dataBook?.startReadingAt,
-                endReadingAt: values.status === "completed" ? gmt7Date : dataBook?.endReadingAt,
-            };
-
-
-            // **Kirim data ke backend**
-            const response = await axios.put('/api/books/edit', payload);
-
+    
+            // Tambahkan waktu membaca jika status berubah
+            const gmt7Date = new Date(Date.now());
+            if (values.status === "reading") {
+                formData.append("startReadingAt", gmt7Date.toISOString());
+            } else if (values.status === "completed") {
+                formData.append("endReadingAt", gmt7Date.toISOString());
+            }
+    
+            const response = await axios.put("/api/books/edit", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+    
             if (response.status === 200) {
                 message.success("Book updated successfully!");
                 setIsModalVisible(true);
-                setIsSubmitting(false);
             }
         } catch (error: any) {
+            message.error(error.response?.data?.error || "Failed to update book. Please try again.");
+        } finally {
             setIsSubmitting(false);
-            message.error(
-                error.response?.data?.error || "Failed to update book. Please try again."
-            );
         }
     };
+    
     const handleModalCancel = () => {
         setIsModalVisibleConfirm(false);
     };
