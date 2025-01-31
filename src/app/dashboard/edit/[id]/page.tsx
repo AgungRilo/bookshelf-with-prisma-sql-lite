@@ -16,6 +16,7 @@ import { useAppSelector } from '@/redux/hooks';
 import ReadingProgressModal from "@/app/components/readingProgressModal";
 import { useTheme } from "@/context/ThemeContext";
 import ConfirmModal from "@/app/components/modalConfirmation";
+import ModalSuccess from "@/app/components/modalSucces";
 
 export default function EditDashboardPage() {
     const [isModalVisibleConfirm, setIsModalVisibleConfirm] = useState<boolean>(false);
@@ -188,19 +189,17 @@ export default function EditDashboardPage() {
                 onCancel={handleModalCancel}
                 closable={false} // Tidak bisa ditutup tanpa tombol
             />
-            <Modal
+            <ModalSuccess
+                isVisible={isModalVisible}
+                setIsVisible={setIsModalVisible}
+                onConfirm={handleModalOk}
                 title="Success"
-                open={isModalVisible}
-                onOk={handleOk}
-                closable={false}
-                footer={[
-                    <Button key="ok" type="primary" onClick={handleOk}>
-                        OK
-                    </Button>,
-                ]}
-            >
-                <p>The book has been successfully edited!</p>
-            </Modal>
+                message="The book has been successfully edited!"
+                confirmText="OK"
+                isDarkMode={isDarkMode}
+                closable={false} // Tidak bisa ditutup tanpa tombol
+            />
+           
             <ReadingProgressModal
                 isDarkMode={isDarkMode}
                 open={readingModalVisible}
@@ -296,7 +295,7 @@ export default function EditDashboardPage() {
                                 name="category"
                                 rules={[{ required: true, message: "Please select a category!" }]}
                             >
-                                <Select placeholder="Select a category" loading={!BOOK_CATEGORIES.length} className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'}>
+                                <Select placeholder="Select a category" loading={!BOOK_CATEGORIES.length} className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={`${isDarkMode ? 'custom-dropdown' : ""}`} >
                                     {BOOK_CATEGORIES.map((category) => (
                                         <Option key={category.value} value={category.value}>
                                             {category.label}
@@ -309,7 +308,7 @@ export default function EditDashboardPage() {
                                 name="status"
                                 rules={[{ required: true, message: "Please select a read status!" }]}
                             >
-                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'} disabled={dataBook?.status === 'completed'} placeholder="Select a read status">
+                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={`${isDarkMode ? 'custom-dropdown' : ""}`}  disabled={dataBook?.status === 'completed'} placeholder="Select a read status">
                                     {readStatus?.map((status: any) => (
                                         <Option key={status.value} value={status.value}>
                                             {status.label}

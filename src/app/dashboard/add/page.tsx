@@ -14,6 +14,7 @@ import { useAppSelector } from '@/redux/hooks';
 import { convertFileToArrayBuffer } from '@/app/utils/utils';
 import { useTheme } from "@/context/ThemeContext";
 import ConfirmModal from '@/app/components/modalConfirmation';
+import ModalSuccess from '@/app/components/modalSucces';
 
 export default function AddDashboardPage() {
     const [isModalVisibleConfirm, setIsModalVisibleConfirm] = useState<boolean>(false);
@@ -128,6 +129,16 @@ export default function AddDashboardPage() {
             >
                 <p>The book has been successfully added!</p>
             </Modal>
+            <ModalSuccess
+                isVisible={isModalVisible}
+                setIsVisible={setIsModalVisible}
+                onConfirm={handleOk}
+                title="Success"
+                message="The book has been successfully edited!"
+                confirmText="OK"
+                isDarkMode={isDarkMode}
+                closable={false} // Tidak bisa ditutup tanpa tombol
+            />
             <div style={{ height: '90vh' }}>
                 <Content className="m-4 overflow-y-auto max-h-[calc(90vh-64px)] p-5 bg-white">
                     <div className={`p-4 ${isDarkMode ? "bg-black" : "bg-white "} rounded-md shadow-sm `}>
@@ -216,7 +227,7 @@ export default function AddDashboardPage() {
                                 name="category"
                                 rules={[{ required: true, message: "Please select a category!" }]}
                             >
-                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'} placeholder="Select a category" loading={!BOOK_CATEGORIES.length}>
+                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={`${isDarkMode ? 'custom-dropdown' : ""}`} placeholder="Select a category" loading={!BOOK_CATEGORIES.length}>
                                     {BOOK_CATEGORIES.map((category) => (
                                         <Option key={category.value} value={category.value}>
                                             {category.label}
@@ -229,7 +240,7 @@ export default function AddDashboardPage() {
                                 name="status"
                                 rules={[{ required: true, message: "Please select a read status!" }]}
                             >
-                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={'custom-dropdown'}  disabled placeholder="Select a read status">
+                                <Select className={`${isDarkMode ? 'custom-select' : "bg-white text-black"}`} popupClassName={`${isDarkMode ? 'custom-dropdown' : ""}`} disabled placeholder="Select a read status">
                                     {READ_STATUS.map((status) => (
                                         <Option key={status.value} value={status.value}>
                                             {status.label}
