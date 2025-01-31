@@ -22,6 +22,13 @@ export async function POST(req: Request) {
 
     const coverImage = formData.get("coverImage");
 
+
+
+    // Konversi file coverImage ke Buffer
+    let coverImageBuffer: Buffer | undefined = undefined;
+    if (coverImage instanceof Blob) {
+      coverImageBuffer = Buffer.from(await coverImage.arrayBuffer());
+    }
     // Validasi input
     if (!title || !author || !category || !status || !isbn || !userId || !coverImage) {
       return NextResponse.json(
@@ -29,13 +36,6 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    // Konversi file coverImage ke Buffer
-    let coverImageBuffer = null;
-    if (coverImage instanceof Blob) {
-      coverImageBuffer = Buffer.from(await coverImage.arrayBuffer());
-    }
-
     // Simpan ke database
     const newBook = await prisma.book.create({
       data: {
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
         category,
         status,
         isbn,
-        coverImage: coverImageBuffer, // Simpan sebagai Buffer
+        ...(coverImageBuffer !== undefined && { coverImage: coverImageBuffer }),
         note,
         userId, // Pastikan userId dalam format integer
       },

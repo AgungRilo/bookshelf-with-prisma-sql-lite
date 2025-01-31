@@ -56,7 +56,7 @@ export async function PUT(req: Request) {
         startReadingAt,
         endReadingAt,
         ...(note !== undefined && { note }), // Update `note` hanya jika dikirim
-        ...(coverImageBuffer && { coverImage: { set: coverImageBuffer } }), // Update hanya jika coverImage ada
+        ...(coverImageBuffer !== undefined && { coverImage: { set: coverImageBuffer } }),
       },
     });
 
