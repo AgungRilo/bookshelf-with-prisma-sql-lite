@@ -7,6 +7,8 @@ export async function POST(req: Request) {
   try {
     // Pastikan request menggunakan multipart/form-data
     const formData = await req.formData();
+
+    // Helper function untuk mengambil string dari FormData
     const getString = (key: string) => {
       const value = formData.get(key);
       return typeof value === "string" ? value.trim() : null;
@@ -17,24 +19,27 @@ export async function POST(req: Request) {
     const category = getString("category");
     const status = getString("status");
     const isbn = getString("isbn");
-    const userId = getString("userId");
+    const userIdValue = getString("userId");
     const note = getString("note") || "";
 
-    const coverImage = formData.get("coverImage");
+    const userId = userIdValue;
 
-
-    let coverImageBuffer: Buffer | null = null;
-
-    if (coverImage instanceof Blob) {
-      coverImageBuffer = Buffer.from(await coverImage.arrayBuffer()); // Menggunakan Buffer
-    }
     // Validasi input
-    if (!title || !author || !category || !status || !isbn || !userId || !coverImage) {
+    if (!title || !author || !category || !status || !isbn || !userId) {
       return NextResponse.json(
         { error: "All fields except note are required." },
         { status: 400 }
       );
     }
+
+    // Ambil file coverImage jika ada
+    const coverImage = formData.get("coverImage");
+    let coverImageBuffer: Uint8Array = new Uint8Array(0); // Default ke array kosong
+
+    if (coverImage instanceof Blob) {
+      coverImageBuffer = new Uint8Array(await coverImage.arrayBuffer()); // Konversi ke Uint8Array
+    }
+
     // Simpan ke database
     const newBook = await prisma.book.create({
       data: {
@@ -43,15 +48,15 @@ export async function POST(req: Request) {
         category,
         status,
         isbn,
-        ...(coverImageBuffer && { coverImage: coverImageBuffer }),
         note,
-        userId, // Pastikan userId dalam format integer
+        userId,
+        coverImage: coverImageBuffer, // Pastikan ini selalu `Uint8Array`
       },
     });
 
     return NextResponse.json(newBook, { status: 201 });
   } catch (error) {
-    console.error(error);
+    console.error("Error:", error);
     return NextResponse.json(
       { error: "Failed to add the book" },
       { status: 500 }
