@@ -44,12 +44,21 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Tailwind
 - Redux Thunk
 - Redux Persist
+- Atlas
 
 ## Features
 
 - Persist Auth 
 - Protected Route
+- Jest Unit Testing
 - Dark and Light mode
 - Grouping books scope by user login
 - Search with debounce
-- Data Proses Reading in detail and edit page
+- Data for Process Reading in detail and edit page
+- Filter by status read or category book
+- Search by author or title
+- Register, Login and Logout
+- Validation Form
+- Lazy loading
+- Confirmation Leave Page, Logout and Delete Book
+
