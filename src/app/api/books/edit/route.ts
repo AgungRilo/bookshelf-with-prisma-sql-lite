@@ -10,6 +10,10 @@ export async function PUT(req: Request) {
       const value = formData.get(key);
       return typeof value === "string" ? value.trim() : null;
     };
+    const getDate = (key: string) => {
+      const value = getString(key);
+      return value ? new Date(value) : null;
+    };
     const id = getString("id");
     const title = getString("title");
     const author = getString("author");
@@ -20,16 +24,8 @@ export async function PUT(req: Request) {
     const note = getString("note") || "";
 
     // Pastikan `startReadingAt` dan `endReadingAt` bertipe string sebelum dikonversi ke Date
-    const startReadingAtValue = getString("startReadingAt");
-    const endReadingAtValue = getString("endReadingAt");
-
-    const startReadingAt = (typeof startReadingAtValue === "string" && startReadingAtValue.trim() !== "")
-        ? new Date(startReadingAtValue)
-        : null;
-
-    const endReadingAt = (typeof endReadingAtValue === "string" && endReadingAtValue.trim() !== "")
-        ? new Date(endReadingAtValue)
-        : null;
+    const startReadingAt = getDate("startReadingAt");
+    const endReadingAt = getDate("endReadingAt");
 
     const coverImage = formData.get("coverImage");
 
