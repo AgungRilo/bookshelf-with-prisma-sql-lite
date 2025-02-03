@@ -39,7 +39,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 - Axios 
 - Prisma
-- Sqlite
 - Antd design v5
 - Tailwind
 - Redux Thunk
