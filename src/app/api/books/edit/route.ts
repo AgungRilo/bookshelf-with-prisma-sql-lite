@@ -35,6 +35,9 @@ export async function PUT(req: Request) {
       where: {
         isbn,
         userId,
+        NOT: {
+          id: id?.toString(), // Abaikan buku yang sedang diedit
+        },
       },
     });
 

@@ -245,7 +245,7 @@ export default function AddDashboardPage() {
                                     htmlType="submit"
                                     loading={isSubmitting}
                                 >
-                                    Add Post
+                                    Add Book
                                 </Button>
                             </div>
 

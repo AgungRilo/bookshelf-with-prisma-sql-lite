@@ -7,17 +7,17 @@ import { useTheme } from "@/context/ThemeContext";
 
 const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { theme } = useTheme();
-        const isDarkMode = theme === 'dark';
-    return <><Layout 
-    // className={`min-h-screen ${darkMode ? 'dark bg-gray-900 text-white' : 'bg-white text-black'}`}
-    className="min-h-screen dark bg-gray-900 text-white"
-    >
-        <Sidebar />
-        <Layout className={`${isDarkMode && "bg-[#3A4750]"}`}>
-            <Header />
-            {children}
+    const isDarkMode = theme === 'dark';
+    return <>
+        <Layout
+            className="min-h-screen dark bg-gray-900 text-white"
+        >
+            <Sidebar />
+            <Layout className={`${isDarkMode && "bg-[#3A4750]"}`}>
+                <Header />
+                {children}
+            </Layout>
         </Layout>
-    </Layout>
     </>;
 };
 

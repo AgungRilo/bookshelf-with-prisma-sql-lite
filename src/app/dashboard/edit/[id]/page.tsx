@@ -334,7 +334,7 @@ export default function EditDashboardPage() {
                                     htmlType="submit"
                                     loading={isSubmitting}
                                 >
-                                    Edit Post
+                                    Edit Book
                                 </Button>
                             </div>
                         </Form>
